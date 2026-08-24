@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { getOptionalUserId } from "@/lib/supabase/get-optional-user";
 import { createSeatLock, releaseSeatLock, SeatAlreadyLockedError } from "@/lib/services/seat-lock.service";
 import { InvalidSegmentOrderError } from "@/lib/services/pricing.service";
 import type { ApiResult, SeatLockResult } from "@/types/database";
@@ -31,10 +31,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<ApiResult
     );
   }
 
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const userId = await getOptionalUserId();
 
   try {
     const result = await createSeatLock({
@@ -43,7 +40,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<ApiResult
       originRouteStopId: parsed.data.originRouteStopId as never,
       destinationRouteStopId: parsed.data.destinationRouteStopId as never,
       sessionId: parsed.data.sessionId,
-      lockedByUserId: (user?.id as never) ?? undefined,
+      lockedByUserId: (userId as never) ?? undefined,
     });
     return NextResponse.json({ ok: true, data: result }, { status: 201 });
   } catch (err) {

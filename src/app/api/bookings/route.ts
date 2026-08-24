@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { getOptionalUserId } from "@/lib/supabase/get-optional-user";
 import {
   issueTicketsForBooking,
   SeatLockExpiredError,
@@ -48,10 +48,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<ApiResult
     );
   }
 
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const userId = await getOptionalUserId();
 
   try {
     const result = await issueTicketsForBooking({
@@ -59,7 +56,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<ApiResult
       contactPhone: parsed.data.contactPhone,
       sessionId: parsed.data.sessionId,
       paymentProvider: parsed.data.paymentProvider,
-      userId: (user?.id as never) ?? undefined,
+      userId: (userId as never) ?? undefined,
       passengers: parsed.data.passengers.map((p) => ({
         seatLockId: p.seatLockId as never,
         fullName: p.fullName,

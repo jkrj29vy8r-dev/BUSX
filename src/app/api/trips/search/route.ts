@@ -66,6 +66,15 @@ export async function GET(request: NextRequest): Promise<NextResponse<ApiResult<
 
   const routeIds = [...new Set(candidates.map((c) => c.route_id))];
 
+  const routeStopStats = await prisma.routeStop.groupBy({
+    by: ["routeId"],
+    where: { routeId: { in: routeIds } },
+    _min: { orderIndex: true },
+    _max: { orderIndex: true },
+    _count: { _all: true },
+  });
+  const statsByRoute = new Map(routeStopStats.map((s) => [s.routeId, s]));
+
   const trips = await prisma.trip.findMany({
     where: {
       routeId: { in: routeIds },
@@ -108,6 +117,7 @@ export async function GET(request: NextRequest): Promise<NextResponse<ApiResult<
       prisma.routeStop.findUniqueOrThrow({ where: { id: candidate.origin_route_stop_id }, include: { stop: true } }),
       prisma.routeStop.findUniqueOrThrow({ where: { id: candidate.destination_route_stop_id }, include: { stop: true } }),
     ]);
+    const stats = statsByRoute.get(trip.routeId);
 
     const scheduledDeparture = new Date(trip.departureAt.getTime() + candidate.origin_offset_minutes * 60_000);
     const scheduledArrival = new Date(trip.departureAt.getTime() + candidate.destination_offset_minutes * 60_000);
@@ -140,6 +150,7 @@ export async function GET(request: NextRequest): Promise<NextResponse<ApiResult<
         stopId: originStop.stopId as never,
         name: originStop.stop.name,
         city: originStop.stop.city,
+        orderIndex: originStop.orderIndex,
         scheduledDeparture: scheduledDeparture.toISOString(),
         scheduledArrival: scheduledDeparture.toISOString(),
       },
@@ -148,9 +159,13 @@ export async function GET(request: NextRequest): Promise<NextResponse<ApiResult<
         stopId: destinationStop.stopId as never,
         name: destinationStop.stop.name,
         city: destinationStop.stop.city,
+        orderIndex: destinationStop.orderIndex,
         scheduledDeparture: scheduledArrival.toISOString(),
         scheduledArrival: scheduledArrival.toISOString(),
       },
+      routeStopCount: stats?._count._all ?? 2,
+      routeStartOrderIndex: stats?._min.orderIndex ?? originStop.orderIndex,
+      routeEndOrderIndex: stats?._max.orderIndex ?? destinationStop.orderIndex,
       price,
       availableSeatsCount,
       vehicleType: trip.vehicle.vehicleType,

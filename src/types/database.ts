@@ -390,6 +390,28 @@ export interface TripSearchResult {
   price: PriceQuote;
   availableSeatsCount: number;
   vehicleType: VehicleTypeEnum;
+  /** Full route's stop count and index bounds, so the UI can plot this
+   * segment's position within the larger N-stop graph without a second
+   * fetch of every route_stop. */
+  routeStopCount: number;
+  routeStartOrderIndex: number;
+  routeEndOrderIndex: number;
+}
+
+export interface TripDetail {
+  trip: TripRow;
+  company: Pick<CompanyRow, "id" | "name" | "slug" | "logo_url" | "brand_primary_color" | "is_verified">;
+  route: Pick<RouteRow, "id" | "name">;
+  vehicle: Pick<VehicleRow, "id" | "vehicle_type" | "seat_layout">;
+  stops: Array<{
+    routeStopId: RouteStopId;
+    stopId: StopId;
+    name: string;
+    city: string;
+    orderIndex: number;
+    scheduledArrival: ISODateTime;
+    scheduledDeparture: ISODateTime;
+  }>;
 }
 
 export interface ResolvedStopStub {
@@ -397,6 +419,7 @@ export interface ResolvedStopStub {
   stopId: StopId;
   name: string;
   city: string;
+  orderIndex: number;
   scheduledDeparture: ISODateTime;
   scheduledArrival: ISODateTime;
 }

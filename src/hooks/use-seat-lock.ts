@@ -2,13 +2,18 @@
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useBookingStore } from "@/store/booking-store";
-import type { ApiResult, RouteStopId, SeatId, SeatLockResult, TripId } from "@/types/database";
+import type { ApiResult, FareClass, RouteStopId, SeatId, SeatLockResult, TripId } from "@/types/database";
 
 interface CreateLockParams {
   tripId: TripId;
   seatId: SeatId;
   originRouteStopId: RouteStopId;
   destinationRouteStopId: RouteStopId;
+  // Carried through to the Zustand store on success — the API doesn't echo
+  // these back, and the store needs them for the checkout summary UI.
+  seatNumber: string;
+  fareClass: FareClass;
+  priceAmount: number;
 }
 
 /** POSTs a seat lock and, on success, invalidates the seat map so the UI
@@ -20,10 +25,14 @@ export function useCreateSeatLock() {
 
   return useMutation({
     mutationFn: async (params: CreateLockParams) => {
+      const { seatNumber, fareClass, priceAmount, ...apiParams } = params;
+      void seatNumber;
+      void fareClass;
+      void priceAmount;
       const res = await fetch("/api/seat-locks", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...params, sessionId }),
+        body: JSON.stringify({ ...apiParams, sessionId }),
       });
       const body = (await res.json()) as ApiResult<SeatLockResult>;
       if (!body.ok) throw new Error(body.error.message);
@@ -32,11 +41,11 @@ export function useCreateSeatLock() {
     onSuccess: (data, variables) => {
       addSeat({
         seatId: variables.seatId,
-        seatNumber: "", // caller fills from the seat map row it already has
+        seatNumber: variables.seatNumber,
         seatLockId: data.lock.id,
         lockExpiresAt: data.lock.expires_at,
-        fareClass: "standard",
-        priceAmount: 0,
+        fareClass: variables.fareClass,
+        priceAmount: variables.priceAmount,
       });
       queryClient.invalidateQueries({ queryKey: ["seat-map", variables.tripId] });
     },
