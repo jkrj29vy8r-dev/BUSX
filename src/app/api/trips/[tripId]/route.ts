@@ -30,6 +30,8 @@ export async function GET(
     name: rs.stop.name,
     city: rs.stop.city,
     orderIndex: rs.orderIndex,
+    latitude: Number(rs.stop.latitude),
+    longitude: Number(rs.stop.longitude),
     scheduledArrival: new Date(trip.departureAt.getTime() + rs.arrivalOffsetMinutes * 60_000).toISOString(),
     scheduledDeparture: new Date(trip.departureAt.getTime() + rs.departureOffsetMinutes * 60_000).toISOString(),
   }));

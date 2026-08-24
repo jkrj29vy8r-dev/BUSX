@@ -150,6 +150,11 @@ export interface SeatLayout {
   aisleAfterCol: number;
   deck: number;
   disabledCells?: Array<[row: number, col: number]>;
+  /** Row indices that render as a contiguous bench with no aisle gap — the
+   * real 4/5-across back row many coaches have. The aisle itself is a CSS
+   * gutter after `aisleAfterCol`, not a seat column, so this can't be
+   * inferred from seat presence; it has to be declared explicitly. */
+  fullWidthRows?: number[];
   layoutVersion: number;
 }
 
@@ -298,6 +303,10 @@ export interface SegmentSeatMap {
   segment: ResolvedSegment;
   vehicleLayout: SeatLayout;
   seats: SeatAvailability[];
+  standardPrice: PriceQuote | null;
+  /** Null when the operator hasn't configured a premium fare for this
+   * segment — VIP seats then fall back to the standard price. */
+  premiumPrice: PriceQuote | null;
 }
 
 export interface PriceQuote {
@@ -368,9 +377,18 @@ export interface CreateBookingInput {
   paymentProvider: string;
 }
 
+/** A just-issued ticket enriched with its seat number — genuinely useful at
+ * the moment of purchase (rendering the wallet pass) and cheap to include
+ * since the issuing transaction already loaded the seat row. Not part of
+ * `TicketRow` itself: `tickets` has no seat_number column, it's joined from
+ * `seats` via seat_id, same as any other GET of a ticket would need to do. */
+export interface IssuedTicket extends TicketRow {
+  seat_number: string;
+}
+
 export interface CreateBookingResult {
   booking: BookingRow;
-  tickets: TicketRow[];
+  tickets: IssuedTicket[];
 }
 
 export interface TripSearchQuery {
@@ -409,6 +427,8 @@ export interface TripDetail {
     name: string;
     city: string;
     orderIndex: number;
+    latitude: number;
+    longitude: number;
     scheduledArrival: ISODateTime;
     scheduledDeparture: ISODateTime;
   }>;

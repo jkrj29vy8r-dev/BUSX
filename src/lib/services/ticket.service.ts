@@ -9,6 +9,7 @@ import type {
   BookingId,
   CreateBookingInput,
   CreateBookingResult,
+  IssuedTicket,
   TicketId,
   TicketRow,
   TicketVerificationResult,
@@ -73,7 +74,7 @@ export async function issueTicketsForBooking(input: CreateBookingInput): Promise
       },
     });
 
-    const tickets: TicketRow[] = [];
+    const tickets: IssuedTicket[] = [];
     let totalAmount = 0;
     let currency = "RON";
 
@@ -147,7 +148,7 @@ export async function issueTicketsForBooking(input: CreateBookingInput): Promise
 
       totalAmount += quote.amount;
       currency = quote.currency;
-      tickets.push(toTicketRow(created));
+      tickets.push({ ...toTicketRow(created), seat_number: seat.seatNumber });
     }
 
     const updatedBooking = await tx.booking.update({

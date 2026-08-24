@@ -4,8 +4,9 @@ import { Suspense, useEffect } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { AlertTriangle, ShieldCheck, TimerReset } from "lucide-react";
 import { Nav } from "@/components/nav";
-import { RouteTimeline } from "@/components/route-timeline";
-import { SeatMap } from "@/components/seat-map";
+import { MetroTimeline } from "@/components/metro-timeline";
+import { MapPinPreview } from "@/components/map-pin-preview";
+import { SeatPicker } from "@/components/seat-picker";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useTripDetail } from "@/hooks/use-trip-detail";
@@ -29,7 +30,7 @@ function PageSkeleton() {
     <div className="min-h-screen">
       <Nav />
       <main className="mx-auto max-w-5xl px-6 py-8">
-        <div className="h-96 animate-pulse rounded-lg border border-border bg-surface" />
+        <div className="h-96 animate-pulse rounded-lg border border-border bg-white" />
       </main>
     </div>
   );
@@ -44,7 +45,7 @@ function TripSeatSelectionContent() {
   const originRouteStopId = searchParams.get("originRouteStopId") as RouteStopId | null;
   const destinationRouteStopId = searchParams.get("destinationRouteStopId") as RouteStopId | null;
   const passengers = Number(searchParams.get("passengers") ?? "1");
-  const priceAmount = Number(searchParams.get("price") ?? "0");
+  const fallbackPrice = Number(searchParams.get("price") ?? "0");
   const currency = searchParams.get("currency") ?? "RON";
   const originLabel = searchParams.get("originLabel") ?? "";
   const destinationLabel = searchParams.get("destinationLabel") ?? "";
@@ -82,6 +83,9 @@ function TripSeatSelectionContent() {
   );
   const secondsLeft = useCountdown(earliestExpiry);
 
+  const standardPrice = seatMap?.standardPrice?.amount ?? fallbackPrice;
+  const premiumPrice = seatMap?.premiumPrice?.amount ?? null;
+
   function handleToggleSeat(seat: SeatAvailability) {
     if (!originRouteStopId || !destinationRouteStopId) return;
     const existing = selectedSeats.find((s) => s.seatId === seat.seatId);
@@ -92,13 +96,17 @@ function TripSeatSelectionContent() {
     }
     if (selectedSeats.length >= passengers) return;
 
+    const isVip = seat.seatType === "premium";
+    const fareClass = isVip && premiumPrice != null ? "premium" : "standard";
+    const priceAmount = fareClass === "premium" ? (premiumPrice as number) : standardPrice;
+
     createLock.mutate({
       tripId,
       seatId: seat.seatId,
       originRouteStopId,
       destinationRouteStopId,
       seatNumber: seat.seatNumber,
-      fareClass: "standard",
+      fareClass,
       priceAmount,
     });
   }
@@ -112,12 +120,12 @@ function TripSeatSelectionContent() {
       <Nav />
 
       <main className="mx-auto max-w-5xl px-6 py-8">
-        {isLoading && <div className="h-96 animate-pulse rounded-lg border border-border bg-surface" />}
+        {isLoading && <div className="h-96 animate-pulse rounded-lg border border-border bg-white" />}
 
         {!isLoading && tripDetail && seatMap && originRouteStopId && destinationRouteStopId && (
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,320px)_1fr]">
             <aside className="flex flex-col gap-4">
-              <div className="rounded-lg border border-border bg-surface p-5">
+              <div className="rounded-lg border border-border bg-white p-5 shadow-subtle">
                 <div className="mb-3 flex items-center gap-2">
                   <span
                     className="flex size-7 items-center justify-center rounded text-xs font-bold text-white"
@@ -125,14 +133,20 @@ function TripSeatSelectionContent() {
                   >
                     {tripDetail.company.name.slice(0, 1)}
                   </span>
-                  <span className="text-sm font-medium text-ink">{tripDetail.company.name}</span>
-                  {tripDetail.company.is_verified && <ShieldCheck className="size-3.5 text-accent" strokeWidth={2} />}
+                  <span className="text-sm font-semibold text-ink">{tripDetail.company.name}</span>
+                  {tripDetail.company.is_verified && <ShieldCheck className="size-3.5 text-electric" strokeWidth={2.25} />}
                 </div>
                 <Badge variant="neutral" className="mb-4">
                   {VEHICLE_TYPE_LABELS[tripDetail.vehicle.vehicle_type]}
                 </Badge>
-                <RouteTimeline
-                  density="full"
+
+                <MapPinPreview
+                  className="mb-4 h-28 w-full"
+                  stops={tripDetail.stops.map((s) => ({ name: s.city, latitude: s.latitude, longitude: s.longitude }))}
+                  highlightIndex={tripDetail.stops.findIndex((s) => s.routeStopId === destinationRouteStopId)}
+                />
+
+                <MetroTimeline
                   stops={tripDetail.stops.map((s) => ({
                     routeStopId: s.routeStopId,
                     name: s.name,
@@ -148,25 +162,28 @@ function TripSeatSelectionContent() {
 
             <section className="flex flex-col gap-4">
               <div className="flex items-center justify-between">
-                <h1 className="text-lg font-semibold text-ink">
+                <h1 className="text-lg font-bold text-ink">
                   Choose {passengers > 1 ? `${passengers} seats` : "a seat"}
                   {originLabel && destinationLabel ? ` · ${originLabel} → ${destinationLabel}` : ""}
                 </h1>
                 {secondsLeft !== null && (
                   <Badge variant={secondsLeft < 60 ? "danger" : "warning"}>
-                    <TimerReset className="size-3" strokeWidth={2} />
+                    <TimerReset className="size-3" strokeWidth={2.25} />
                     {formatCountdown(secondsLeft)} left to check out
                   </Badge>
                 )}
               </div>
 
-              <SeatMap
+              <SeatPicker
                 layout={seatMap.vehicleLayout}
                 seats={seatMap.seats}
                 selectedSeatIds={new Set(selectedSeats.map((s) => s.seatId))}
                 pendingSeatIds={new Set(createLock.isPending && createLock.variables ? [createLock.variables.seatId] : [])}
                 onToggleSeat={handleToggleSeat}
                 maxSelectable={passengers}
+                standardPriceAmount={standardPrice}
+                premiumPriceAmount={premiumPrice}
+                currency={currency}
               />
 
               {createLock.isError && (
@@ -181,23 +198,18 @@ function TripSeatSelectionContent() {
       </main>
 
       {selectedSeats.length > 0 && (
-        <div className="fixed inset-x-0 bottom-0 border-t border-border bg-surface-raised/95 backdrop-blur-md">
+        <div className="fixed inset-x-0 bottom-0 border-t border-border bg-white/95 backdrop-blur-md">
           <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-4">
             <div>
               <div className="text-sm text-ink-secondary">
                 {selectedSeats.length} / {passengers} {passengers === 1 ? "seat" : "seats"} selected · seat
                 {selectedSeats.length === 1 ? "" : "s"} {selectedSeats.map((s) => s.seatNumber).join(", ")}
               </div>
-              <div className="text-xl font-semibold tabular-nums text-ink">
+              <div className="text-xl font-extrabold tabular-nums text-ink">
                 {total.toFixed(0)} <span className="text-sm font-normal text-ink-tertiary">{currency}</span>
               </div>
             </div>
-            <Button
-              variant="accent"
-              size="lg"
-              disabled={!readyToCheckout}
-              onClick={() => router.push("/checkout")}
-            >
+            <Button variant="electric" size="lg" disabled={!readyToCheckout} onClick={() => router.push("/checkout")}>
               Continue to checkout
             </Button>
           </div>

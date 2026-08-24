@@ -7,14 +7,11 @@ import { Nav } from "@/components/nav";
 import { TripCard } from "@/components/trip-card";
 import { Button } from "@/components/ui/button";
 import { useTripSearch } from "@/hooks/use-trip-search";
+import { formatWeekdayDate } from "@/lib/format-date";
 import type { StopId } from "@/types/database";
 
 function formatDateLabel(dateStr: string): string {
-  return new Date(`${dateStr}T00:00:00`).toLocaleDateString("en-GB", {
-    weekday: "short",
-    day: "numeric",
-    month: "short",
-  });
+  return formatWeekdayDate(new Date(`${dateStr}T00:00:00`));
 }
 
 export default function SearchResultsPage() {
@@ -63,9 +60,9 @@ function SearchResultsContent() {
 
       <main className="mx-auto max-w-3xl px-6 py-8">
         <div className="mb-6 flex flex-col gap-3 border-b border-border pb-6">
-          <div className="flex items-center gap-2 text-lg font-semibold text-ink">
+          <div className="flex items-center gap-2 text-lg font-extrabold tracking-tight text-ink">
             <span>{originLabel}</span>
-            <ArrowRight className="size-4 text-ink-tertiary" strokeWidth={1.5} />
+            <ArrowRight className="size-4 text-ink-tertiary" strokeWidth={2} />
             <span>{destinationLabel}</span>
           </div>
           <div className="flex items-center gap-4 text-sm text-ink-secondary">

@@ -1,14 +1,24 @@
 import "server-only";
 
 import { prisma } from "@/lib/prisma";
-import { InvalidSegmentOrderError } from "@/lib/services/pricing.service";
+import { getSegmentPrice, SegmentNotSellableError, InvalidSegmentOrderError } from "@/lib/services/pricing.service";
 import type {
+  PriceQuote,
   ResolvedSegment,
   RouteStopId,
   SeatAvailability,
   SegmentSeatMap,
   TripId,
 } from "@/types/database";
+
+async function tryGetPrice(params: Parameters<typeof getSegmentPrice>[0]): Promise<PriceQuote | null> {
+  try {
+    return await getSegmentPrice(params);
+  } catch (err) {
+    if (err instanceof SegmentNotSellableError) return null;
+    throw err;
+  }
+}
 
 /**
  * Delegates to the `get_segment_seat_availability` SQL function (see
@@ -76,11 +86,19 @@ export async function getSegmentSeatMap(params: {
     destinationOrderIndex: destination.orderIndex,
   };
 
+  const priceParams = { routeId: trip.routeId as never, originRouteStopId, destinationRouteStopId, onDate: trip.departureAt };
+  const [standardPrice, premiumPrice] = await Promise.all([
+    tryGetPrice({ ...priceParams, fareClass: "standard" }),
+    tryGetPrice({ ...priceParams, fareClass: "premium" }),
+  ]);
+
   return {
     trip: { id: trip.id as TripId, departure_at: trip.departureAt.toISOString(), status: trip.status, currency: trip.currency },
     segment,
     vehicleLayout: trip.vehicle.seatLayout as unknown as SegmentSeatMap["vehicleLayout"],
     seats,
+    standardPrice,
+    premiumPrice,
   };
 }
 

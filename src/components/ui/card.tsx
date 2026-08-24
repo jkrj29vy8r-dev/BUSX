@@ -5,10 +5,7 @@ export const Card = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>>(
   ({ className, ...props }, ref) => (
     <div
       ref={ref}
-      className={cn(
-        "rounded-lg border border-border bg-surface transition-colors duration-150",
-        className
-      )}
+      className={cn("rounded-lg border border-border bg-white shadow-subtle transition-colors duration-150", className)}
       {...props}
     />
   )
@@ -20,8 +17,8 @@ export const CardInteractive = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDiv
     <div
       ref={ref}
       className={cn(
-        "group rounded-lg border border-border bg-surface transition-all duration-150 ease-snap",
-        "hover:border-border-hover hover:bg-surface-raised hover:shadow-panel",
+        "group rounded-lg border border-border bg-white shadow-subtle transition-all duration-150 ease-snap",
+        "hover:-translate-y-0.5 hover:border-border-strong hover:shadow-panel",
         "cursor-pointer",
         className
       )}

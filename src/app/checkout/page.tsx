@@ -2,14 +2,15 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { CheckCircle2, Loader2, Ticket, User } from "lucide-react";
+import { CheckCircle2, Loader2, User } from "lucide-react";
 import { Nav } from "@/components/nav";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card } from "@/components/ui/card";
+import { TicketPass } from "@/components/ticket-pass";
 import { useBookingStore } from "@/store/booking-store";
 import { useCreateBooking } from "@/hooks/use-create-booking";
-import type { CreateBookingResult, FareClass } from "@/types/database";
+import { useTripDetail } from "@/hooks/use-trip-detail";
+import type { CreateBookingResult, FareClass, RouteStopId, TripId } from "@/types/database";
 
 interface PassengerFormRow {
   seatLockId: string;
@@ -19,10 +20,19 @@ interface PassengerFormRow {
   priceAmount: number;
 }
 
+interface ConfirmedContext {
+  tripId: TripId;
+  originRouteStopId: RouteStopId;
+  destinationRouteStopId: RouteStopId;
+}
+
 export default function CheckoutPage() {
   const router = useRouter();
   const selectedSeats = useBookingStore((s) => s.selectedSeats);
   const sessionId = useBookingStore((s) => s.sessionId);
+  const storeTripId = useBookingStore((s) => s.tripId);
+  const storeOrigin = useBookingStore((s) => s.originRouteStopId);
+  const storeDestination = useBookingStore((s) => s.destinationRouteStopId);
   const reset = useBookingStore((s) => s.reset);
 
   const [contactEmail, setContactEmail] = useState("");
@@ -39,6 +49,9 @@ export default function CheckoutPage() {
 
   const createBooking = useCreateBooking();
   const [result, setResult] = useState<CreateBookingResult | null>(null);
+  const [confirmedContext, setConfirmedContext] = useState<ConfirmedContext | null>(null);
+
+  const { data: tripDetail } = useTripDetail(confirmedContext?.tripId ?? null);
 
   const total = rows.reduce((sum, r) => sum + r.priceAmount, 0);
   const canSubmit = contactEmail.trim().length > 3 && rows.every((r) => r.fullName.trim().length > 1);
@@ -49,6 +62,8 @@ export default function CheckoutPage() {
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (!storeTripId || !storeOrigin || !storeDestination) return;
+
     createBooking.mutate(
       {
         contactEmail,
@@ -64,6 +79,7 @@ export default function CheckoutPage() {
       {
         onSuccess: (data) => {
           setResult(data);
+          setConfirmedContext({ tripId: storeTripId, originRouteStopId: storeOrigin, destinationRouteStopId: storeDestination });
           reset();
         },
       }
@@ -71,34 +87,41 @@ export default function CheckoutPage() {
   }
 
   if (result) {
+    const origin = tripDetail?.stops.find((s) => s.routeStopId === confirmedContext?.originRouteStopId);
+    const destination = tripDetail?.stops.find((s) => s.routeStopId === confirmedContext?.destinationRouteStopId);
+
     return (
       <div className="min-h-screen">
         <Nav />
-        <main className="mx-auto max-w-lg px-6 py-16 text-center">
-          <div className="mx-auto mb-4 flex size-14 items-center justify-center rounded-full bg-positive-muted text-positive">
+        <main className="mx-auto max-w-2xl px-6 py-16 text-center">
+          <div className="mx-auto mb-4 flex size-14 items-center justify-center rounded-full bg-emerald-muted text-emerald-hover">
             <CheckCircle2 className="size-7" strokeWidth={1.75} />
           </div>
-          <h1 className="text-xl font-semibold text-ink">Booking confirmed</h1>
-          <p className="mt-1 text-sm text-ink-secondary">{result.booking.booking_number}</p>
+          <h1 className="text-xl font-extrabold text-ink">Booking confirmed</h1>
+          <p className="mt-1 font-mono text-sm text-ink-secondary">{result.booking.booking_number}</p>
 
-          <div className="mt-6 flex flex-col gap-3">
-            {result.tickets.map((t) => (
-              <Card key={t.id} className="flex items-center justify-between p-4 text-left">
-                <div className="flex items-center gap-3">
-                  <Ticket className="size-4 text-accent" strokeWidth={1.75} />
-                  <div>
-                    <div className="text-sm font-medium text-ink">{t.passenger_full_name}</div>
-                    <div className="font-mono text-xs text-ink-tertiary">{t.ticket_number}</div>
-                  </div>
-                </div>
-                <div className="text-sm tabular-nums text-ink-secondary">
-                  {t.price_amount.toFixed(0)} {t.currency}
-                </div>
-              </Card>
-            ))}
+          <div className="mt-8 flex flex-col items-center gap-6">
+            {result.tickets.map((t) =>
+              tripDetail && origin && destination ? (
+                <TicketPass
+                  key={t.id}
+                  ticket={t}
+                  companyName={tripDetail.company.name}
+                  companyColor={tripDetail.company.brand_primary_color}
+                  routeName={tripDetail.route.name}
+                  originCity={origin.city}
+                  destinationCity={destination.city}
+                  departureAtISO={tripDetail.trip.departure_at}
+                  tripStatus={tripDetail.trip.status}
+                  stopsForMap={tripDetail.stops.map((s) => ({ name: s.city, latitude: s.latitude, longitude: s.longitude }))}
+                />
+              ) : (
+                <div key={t.id} className="h-96 w-full max-w-sm animate-pulse rounded-xl bg-ink/[0.06]" />
+              )
+            )}
           </div>
 
-          <Button variant="secondary" size="md" className="mt-8" onClick={() => router.push("/")}>
+          <Button variant="secondary" size="md" className="mt-10" onClick={() => router.push("/")}>
             Back to home
           </Button>
         </main>
@@ -124,17 +147,17 @@ export default function CheckoutPage() {
     <div className="min-h-screen">
       <Nav />
       <main className="mx-auto max-w-lg px-6 py-8">
-        <h1 className="mb-6 text-lg font-semibold text-ink">Passenger details</h1>
+        <h1 className="mb-6 text-lg font-bold text-ink">Passenger details</h1>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-6">
           <div className="flex flex-col gap-3">
             {rows.map((row) => (
               <div key={row.seatLockId} className="flex items-center gap-3">
-                <span className="flex size-9 shrink-0 items-center justify-center rounded-md border border-border bg-surface-sunken text-xs font-medium text-ink-secondary">
+                <span className="flex size-9 shrink-0 items-center justify-center rounded-md border border-border bg-surface-inset text-xs font-bold text-ink-secondary">
                   {row.seatNumber}
                 </span>
                 <Input
-                  icon={<User className="size-4" strokeWidth={1.5} />}
+                  icon={<User className="size-4" strokeWidth={1.75} />}
                   placeholder="Full name, as on ID"
                   value={row.fullName}
                   onChange={(e) => updateName(row.seatLockId, e.target.value)}
@@ -157,12 +180,12 @@ export default function CheckoutPage() {
 
           <div className="flex items-center justify-between border-t border-border pt-4">
             <div className="text-md text-ink-secondary">Total</div>
-            <div className="text-xl font-semibold tabular-nums text-ink">
+            <div className="text-xl font-extrabold tabular-nums text-ink">
               {total.toFixed(0)} <span className="text-sm font-normal text-ink-tertiary">RON</span>
             </div>
           </div>
 
-          <Button type="submit" variant="accent" size="lg" disabled={!canSubmit || createBooking.isPending}>
+          <Button type="submit" variant="electric" size="lg" disabled={!canSubmit || createBooking.isPending}>
             {createBooking.isPending && <Loader2 className="size-4 animate-spin" />}
             Confirm and pay
           </Button>
