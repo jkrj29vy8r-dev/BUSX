@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { TicketPass } from "@/components/ticket-pass";
 import { useBookingStore } from "@/store/booking-store";
 import { useCreateBooking } from "@/hooks/use-create-booking";
+import { useReleaseAllSeatLocks } from "@/hooks/use-seat-lock";
 import { useTripDetail } from "@/hooks/use-trip-detail";
 import type { CreateBookingResult, FareClass, RouteStopId, TripId } from "@/types/database";
 
@@ -48,8 +49,10 @@ export default function CheckoutPage() {
   );
 
   const createBooking = useCreateBooking();
+  const releaseAllLocks = useReleaseAllSeatLocks();
   const [result, setResult] = useState<CreateBookingResult | null>(null);
   const [confirmedContext, setConfirmedContext] = useState<ConfirmedContext | null>(null);
+  const [holdExpired, setHoldExpired] = useState(false);
 
   const { data: tripDetail } = useTripDetail(confirmedContext?.tripId ?? null);
 
@@ -81,6 +84,16 @@ export default function CheckoutPage() {
           setResult(data);
           setConfirmedContext({ tripId: storeTripId, originRouteStopId: storeOrigin, destinationRouteStopId: storeDestination });
           reset();
+        },
+        onError: () => {
+          // The booking transaction failed atomically — none of this
+          // session's seat locks converted to tickets, so they're still
+          // sitting on a dead 10-minute hold. Free them immediately rather
+          // than making other shoppers wait out the TTL, and stop the user
+          // from resubmitting a form whose seatLockIds can only ever fail
+          // again the same way.
+          releaseAllLocks.mutate();
+          setHoldExpired(true);
         },
       }
     );
@@ -174,7 +187,11 @@ export default function CheckoutPage() {
 
           {createBooking.isError && (
             <div className="rounded-md border border-danger/30 bg-danger/[0.06] px-3 py-2 text-sm text-danger">
-              {createBooking.error instanceof Error ? createBooking.error.message : "Checkout failed — please try again."}
+              {holdExpired
+                ? "Your seat hold expired or was taken by someone else — it's been released. Please search again."
+                : createBooking.error instanceof Error
+                  ? createBooking.error.message
+                  : "Checkout failed — please try again."}
             </div>
           )}
 
@@ -185,10 +202,16 @@ export default function CheckoutPage() {
             </div>
           </div>
 
-          <Button type="submit" variant="electric" size="lg" disabled={!canSubmit || createBooking.isPending}>
-            {createBooking.isPending && <Loader2 className="size-4 animate-spin" />}
-            Confirm and pay
-          </Button>
+          {holdExpired ? (
+            <Button type="button" variant="secondary" size="lg" onClick={() => router.push("/")}>
+              Start a new search
+            </Button>
+          ) : (
+            <Button type="submit" variant="electric" size="lg" disabled={!canSubmit || createBooking.isPending}>
+              {createBooking.isPending && <Loader2 className="size-4 animate-spin" />}
+              Confirm and pay
+            </Button>
+          )}
         </form>
       </main>
     </div>

@@ -1,7 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { getOptionalUserId } from "@/lib/supabase/get-optional-user";
-import { createSeatLock, releaseSeatLock, SeatAlreadyLockedError } from "@/lib/services/seat-lock.service";
+import {
+  createSeatLock,
+  releaseSeatLock,
+  releaseSeatLocksForSession,
+  SeatAlreadyLockedError,
+} from "@/lib/services/seat-lock.service";
 import { InvalidSegmentOrderError } from "@/lib/services/pricing.service";
 import type { ApiResult, SeatLockResult } from "@/types/database";
 
@@ -55,21 +60,39 @@ export async function POST(request: NextRequest): Promise<NextResponse<ApiResult
 }
 
 const releaseSchema = z.object({
-  lockId: z.string().uuid(),
+  lockId: z.string().uuid().optional(),
   sessionId: z.string().min(8).max(128),
 });
 
-/** DELETE /api/seat-locks — release a hold early (passenger deselects a seat). */
-export async function DELETE(request: NextRequest): Promise<NextResponse<ApiResult<{ released: true }>>> {
+/**
+ * DELETE /api/seat-locks — release seat hold(s) early.
+ *
+ *   - `{ lockId, sessionId }` releases exactly that lock (passenger
+ *     deselects one seat). Scoped to the session that created it, matching
+ *     `createSeatLock`'s ownership model.
+ *   - `{ sessionId }` alone (no lockId) releases EVERY active lock for that
+ *     session in one call — the "auto-release on payment failure /
+ *     abandoned checkout" path: a booking attempt that fails after
+ *     acquiring locks (declined payment, an expired hold, a losing race on
+ *     one seat in a multi-passenger booking) should free all of that
+ *     session's seats immediately rather than leave them dead-held for up
+ *     to 10 minutes.
+ */
+export async function DELETE(request: NextRequest): Promise<NextResponse<ApiResult<{ released: true; count: number }>>> {
   const body = await request.json().catch(() => null);
   const parsed = releaseSchema.safeParse(body);
   if (!parsed.success) {
     return NextResponse.json(
-      { ok: false, error: { code: "VALIDATION_ERROR", message: "Invalid release request", details: parsed.error.flatten() } },
+      { ok: false, error: { code: "VALIDATION_ERROR", message: "Provide { sessionId } or { lockId, sessionId }", details: parsed.error.flatten() } },
       { status: 400 }
     );
   }
 
-  await releaseSeatLock(parsed.data.lockId as never, { sessionId: parsed.data.sessionId });
-  return NextResponse.json({ ok: true, data: { released: true } });
+  if (parsed.data.lockId) {
+    await releaseSeatLock(parsed.data.lockId as never, { sessionId: parsed.data.sessionId });
+    return NextResponse.json({ ok: true, data: { released: true, count: 1 } });
+  }
+
+  const count = await releaseSeatLocksForSession(parsed.data.sessionId);
+  return NextResponse.json({ ok: true, data: { released: true, count } });
 }

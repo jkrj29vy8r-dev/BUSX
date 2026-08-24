@@ -666,6 +666,7 @@ export interface OperatorTripManifest {
 export interface ApiError {
   code:
     | "SEGMENT_INVALID_ORDER"
+    | "STOP_ORDER_NOT_FOUND"
     | "SEAT_UNAVAILABLE"
     | "LOCK_EXPIRED"
     | "LOCK_NOT_FOUND"
@@ -674,6 +675,7 @@ export interface ApiError {
     | "VALIDATION_ERROR"
     | "NOT_FOUND"
     | "FORBIDDEN"
+    | "UNAUTHORIZED"
     | "INTERNAL_ERROR";
   message: string;
   details?: unknown;

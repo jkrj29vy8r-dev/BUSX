@@ -74,3 +74,28 @@ export function useReleaseSeatLock() {
     },
   });
 }
+
+/**
+ * Bulk-releases every active lock this checkout session is holding. Fired
+ * from the checkout page's booking-failure handler: `issueTicketsForBooking`
+ * runs as one transaction, so a failure (expired hold, a losing race on one
+ * seat among several) means none of the session's locks converted to
+ * tickets — they're still occupying a 10-minute hold nobody can use. This
+ * frees them immediately instead of making other shoppers wait out the TTL.
+ */
+export function useReleaseAllSeatLocks() {
+  const sessionId = useBookingStore((s) => s.sessionId);
+
+  return useMutation({
+    mutationFn: async () => {
+      const res = await fetch("/api/seat-locks", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sessionId }),
+      });
+      const body = (await res.json()) as ApiResult<{ released: true; count: number }>;
+      if (!body.ok) throw new Error(body.error.message);
+      return body.data;
+    },
+  });
+}

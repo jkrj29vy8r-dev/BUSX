@@ -91,6 +91,26 @@ export async function releaseSeatLock(lockId: SeatLockId, opts: { sessionId?: st
   });
 }
 
+/**
+ * Bulk release for a whole checkout session — "auto-release on payment
+ * failure / abandoned checkout" in one call, instead of the client tracking
+ * every individual lockId it acquired. `issueTicketsForBooking` runs all of
+ * a booking's tickets in a single transaction, so a failure there (an
+ * expired lock, a raced exclusion violation, a declined payment) means NONE
+ * of that session's locks were converted — every one of them is still
+ * sitting on a 10-minute hold nobody can use until this is called or the
+ * TTL naturally lapses. Scoped strictly to `status = 'active'` so it can
+ * never touch a lock that already converted into a ticket or was already
+ * released/expired by something else.
+ */
+export async function releaseSeatLocksForSession(sessionId: string): Promise<number> {
+  const result = await prisma.seatLock.updateMany({
+    where: { sessionId, status: "active" },
+    data: { status: "released" },
+  });
+  return result.count;
+}
+
 /** Called by an Edge Function / pg_cron job every 1-2 min; also safe to call inline. */
 export async function sweepExpiredSeatLocks(): Promise<number> {
   const result = await prisma.$queryRaw<Array<{ release_expired_seat_locks: number }>>`
