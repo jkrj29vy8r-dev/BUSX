@@ -1,0 +1,466 @@
+// ============================================================================
+// BUSX — Prisma schema
+//
+// This schema is generated to match supabase/migrations/0001_init_busx_core.sql
+// 1:1 for every column, enum, index and relation Prisma can express.
+//
+// Prisma CANNOT express (left to the raw SQL migration, which is the source
+// of truth for these):
+//   - GENERATED ALWAYS AS (...) STORED columns (segment_range on seat_locks/tickets)
+//   - EXCLUDE USING gist (...) constraints (the core double-booking guarantee)
+//   - CHECK constraints referencing subqueries / other tables (trigger-enforced)
+//   - RLS policies, SECURITY DEFINER functions, triggers
+//
+// Workflow: `prisma migrate dev --create-only` generates the plain-DDL part;
+// the GiST/RLS/function statements are appended from 0001_init_busx_core.sql
+// before the migration is applied. `prisma db pull` will re-introspect the
+// generated columns as Unsupported("...") — do not overwrite this file with
+// a blind pull without re-merging the hand-written relations/enums below.
+// ============================================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  // Supabase: use the pooled connection for `url` and the direct connection
+  // for `directUrl` so `prisma migrate` bypasses pgbouncer.
+  directUrl = env("DIRECT_URL")
+}
+
+// ----------------------------------------------------------------------------
+// ENUMS
+// ----------------------------------------------------------------------------
+
+enum UserRole {
+  passenger
+  operator_admin
+  conductor
+  super_admin
+
+  @@map("user_role")
+}
+
+enum CompanyStatus {
+  pending
+  active
+  suspended
+  terminated
+
+  @@map("company_status")
+}
+
+enum VehicleType {
+  minibus_16
+  sprinter_19
+  isuzu_30
+  coach_50
+  double_decker_70
+  custom
+
+  @@map("vehicle_type")
+}
+
+enum SeatType {
+  standard
+  premium
+  disabled_access
+  driver
+  conductor
+
+  @@map("seat_type")
+}
+
+enum TripStatus {
+  scheduled
+  boarding
+  departed
+  in_transit
+  completed
+  cancelled
+  delayed
+
+  @@map("trip_status")
+}
+
+enum StopEventStatus {
+  pending
+  arrived
+  departed
+  skipped
+
+  @@map("stop_event_status")
+}
+
+enum LockStatus {
+  active
+  released
+  converted
+  expired
+
+  @@map("lock_status")
+}
+
+enum TicketStatus {
+  reserved
+  paid
+  checked_in
+  boarded
+  cancelled
+  refunded
+  expired
+  no_show
+
+  @@map("ticket_status")
+}
+
+enum PaymentStatus {
+  pending
+  paid
+  failed
+  refunded
+  partially_refunded
+
+  @@map("payment_status")
+}
+
+enum FareClass {
+  standard
+  premium
+  student
+  senior
+
+  @@map("fare_class")
+}
+
+// ----------------------------------------------------------------------------
+// MODELS
+// ----------------------------------------------------------------------------
+
+model Company {
+  id                    String        @id @default(uuid()) @db.Uuid
+  name                  String
+  slug                  String        @unique
+  legalName             String?       @map("legal_name")
+  fiscalCode            String?       @map("fiscal_code")
+  brandPrimaryColor     String        @default("#0F172A") @map("brand_primary_color")
+  brandSecondaryColor   String        @default("#38BDF8") @map("brand_secondary_color")
+  logoUrl               String?       @map("logo_url")
+  supportPhone          String?       @map("support_phone")
+  supportEmail          String?       @map("support_email")
+  commissionRatePct     Decimal       @default(10.00) @map("commission_rate_pct") @db.Decimal(5, 2)
+  status                CompanyStatus @default(pending)
+  isVerified            Boolean       @default(false) @map("is_verified")
+  verifiedAt            DateTime?     @map("verified_at") @db.Timestamptz(6)
+  createdAt             DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt             DateTime      @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  profiles Profile[]
+  routes   Route[]
+  vehicles Vehicle[]
+  trips    Trip[]
+
+  @@map("companies")
+}
+
+model Profile {
+  id        String    @id @db.Uuid // references auth.users(id), not modeled by Prisma
+  role      UserRole  @default(passenger)
+  companyId String?   @map("company_id") @db.Uuid
+  fullName  String?   @map("full_name")
+  phone     String?
+  avatarUrl String?   @map("avatar_url")
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  company           Company?    @relation(fields: [companyId], references: [id])
+  driverTrips       Trip[]      @relation("TripDriver")
+  conductorTrips    Trip[]      @relation("TripConductor")
+  bookings          Booking[]
+  seatLocks         SeatLock[]
+  tickets           Ticket[]
+
+  @@index([companyId])
+  @@map("profiles")
+}
+
+model Stop {
+  id           String   @id @default(uuid()) @db.Uuid
+  name         String
+  city         String
+  county       String?
+  countryCode  String   @default("RO") @map("country_code") @db.Char(2)
+  stationCode  String?  @unique @map("station_code")
+  latitude     Decimal  @db.Decimal(9, 6)
+  longitude    Decimal  @db.Decimal(9, 6)
+  timezone     String   @default("Europe/Bucharest")
+  isAirport    Boolean  @default(false) @map("is_airport")
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  routeStops RouteStop[]
+
+  @@index([city])
+  @@map("stops")
+}
+
+model Route {
+  id          String   @id @default(uuid()) @db.Uuid
+  companyId   String   @map("company_id") @db.Uuid
+  name        String
+  slug        String
+  distanceKm  Decimal? @map("distance_km") @db.Decimal(7, 2)
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  company        Company                @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  routeStops     RouteStop[]
+  pricingMatrix  SegmentPricingMatrix[]
+  trips          Trip[]
+
+  @@unique([companyId, slug])
+  @@index([companyId])
+  @@map("routes")
+}
+
+/// The N-stop graph. order_index is the canonical sequence used for all
+/// segment-overlap math (pricing validity, seat availability, ticket ranges).
+model RouteStop {
+  id                       String   @id @default(uuid()) @db.Uuid
+  routeId                  String   @map("route_id") @db.Uuid
+  stopId                   String   @map("stop_id") @db.Uuid
+  orderIndex               Int      @map("order_index")
+  arrivalOffsetMinutes     Int      @default(0) @map("arrival_offset_minutes")
+  departureOffsetMinutes   Int      @default(0) @map("departure_offset_minutes")
+  distanceFromStartKm      Decimal? @map("distance_from_start_km") @db.Decimal(7, 2)
+  platformOrGate           String?  @map("platform_or_gate")
+  isPickupPoint            Boolean  @default(true) @map("is_pickup_point")
+  isDropoffPoint           Boolean  @default(true) @map("is_dropoff_point")
+  createdAt                DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  route Route @relation(fields: [routeId], references: [id], onDelete: Cascade)
+  stop  Stop  @relation(fields: [stopId], references: [id])
+
+  pricingAsOrigin      SegmentPricingMatrix[] @relation("PricingOrigin")
+  pricingAsDestination SegmentPricingMatrix[] @relation("PricingDestination")
+  tripStopTimes        TripStopTime[]
+  seatLocksAsOrigin    SeatLock[]             @relation("LockOrigin")
+  seatLocksAsDest      SeatLock[]             @relation("LockDestination")
+  ticketsAsOrigin      Ticket[]               @relation("TicketOrigin")
+  ticketsAsDest        Ticket[]               @relation("TicketDestination")
+
+  @@unique([routeId, orderIndex])
+  @@unique([routeId, stopId])
+  @@index([stopId])
+  @@map("route_stops")
+}
+
+/// Differential matrix pricing: price is a function of (route, origin stop, destination stop, fare class).
+model SegmentPricingMatrix {
+  id                      String    @id @default(uuid()) @db.Uuid
+  routeId                 String    @map("route_id") @db.Uuid
+  originRouteStopId       String    @map("origin_route_stop_id") @db.Uuid
+  destinationRouteStopId  String    @map("destination_route_stop_id") @db.Uuid
+  fareClass               FareClass @default(standard) @map("fare_class")
+  priceAmount             Decimal   @map("price_amount") @db.Decimal(10, 2)
+  currency                String    @default("RON") @db.Char(3)
+  validFrom               DateTime  @default(now()) @map("valid_from") @db.Date
+  validUntil              DateTime? @map("valid_until") @db.Date
+  isActive                Boolean   @default(true) @map("is_active")
+  createdAt               DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt               DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  route       Route     @relation(fields: [routeId], references: [id], onDelete: Cascade)
+  originStop  RouteStop @relation("PricingOrigin", fields: [originRouteStopId], references: [id], onDelete: Cascade)
+  destStop    RouteStop @relation("PricingDestination", fields: [destinationRouteStopId], references: [id], onDelete: Cascade)
+
+  @@unique([routeId, originRouteStopId, destinationRouteStopId, fareClass, validFrom])
+  @@index([routeId, originRouteStopId, destinationRouteStopId])
+  @@map("segment_pricing_matrix")
+}
+
+/// total_seats + vehicle_type give quick capacity filters; seat_layout jsonb
+/// drives the actual visual seat map rendering (rows/cols/aisle/deck).
+model Vehicle {
+  id                 String      @id @default(uuid()) @db.Uuid
+  companyId          String      @map("company_id") @db.Uuid
+  registrationPlate  String      @unique @map("registration_plate")
+  vehicleType        VehicleType @map("vehicle_type")
+  totalSeats         Int         @map("total_seats")
+  seatLayout         Json        @default("{}") @map("seat_layout")
+  amenities          Json        @default("[]")
+  isActive           Boolean     @default(true) @map("is_active")
+  createdAt          DateTime    @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt          DateTime    @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  seats   Seat[]
+  trips   Trip[]
+
+  @@index([companyId])
+  @@map("vehicles")
+}
+
+model Seat {
+  id           String   @id @default(uuid()) @db.Uuid
+  vehicleId    String   @map("vehicle_id") @db.Uuid
+  seatNumber   String   @map("seat_number")
+  rowNumber    Int      @map("row_number")
+  colPosition  Int      @map("col_position")
+  deck         Int      @default(1)
+  seatType     SeatType @default(standard) @map("seat_type")
+  isBookable   Boolean  @default(true) @map("is_bookable")
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  vehicle   Vehicle    @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  seatLocks SeatLock[]
+  tickets   Ticket[]
+
+  @@unique([vehicleId, seatNumber])
+  @@index([vehicleId])
+  @@map("seats")
+}
+
+model Trip {
+  id           String     @id @default(uuid()) @db.Uuid
+  routeId      String     @map("route_id") @db.Uuid
+  vehicleId    String     @map("vehicle_id") @db.Uuid
+  companyId    String     @map("company_id") @db.Uuid
+  driverId     String?    @map("driver_id") @db.Uuid
+  conductorId  String?    @map("conductor_id") @db.Uuid
+  departureAt  DateTime   @map("departure_at") @db.Timestamptz(6)
+  status       TripStatus @default(scheduled)
+  currency     String     @default("RON") @db.Char(3)
+  createdAt    DateTime   @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime   @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  route     Route          @relation(fields: [routeId], references: [id])
+  vehicle   Vehicle        @relation(fields: [vehicleId], references: [id])
+  company   Company        @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  driver    Profile?       @relation("TripDriver", fields: [driverId], references: [id])
+  conductor Profile?       @relation("TripConductor", fields: [conductorId], references: [id])
+
+  stopTimes TripStopTime[]
+  seatLocks SeatLock[]
+  tickets   Ticket[]
+
+  @@unique([routeId, vehicleId, departureAt])
+  @@index([routeId, departureAt])
+  @@index([companyId, departureAt])
+  @@map("trips")
+}
+
+model TripStopTime {
+  id                  String           @id @default(uuid()) @db.Uuid
+  tripId              String           @map("trip_id") @db.Uuid
+  routeStopId         String           @map("route_stop_id") @db.Uuid
+  scheduledArrival    DateTime         @map("scheduled_arrival") @db.Timestamptz(6)
+  scheduledDeparture  DateTime         @map("scheduled_departure") @db.Timestamptz(6)
+  actualArrival       DateTime?        @map("actual_arrival") @db.Timestamptz(6)
+  actualDeparture     DateTime?        @map("actual_departure") @db.Timestamptz(6)
+  status              StopEventStatus  @default(pending)
+
+  trip      Trip      @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  routeStop RouteStop @relation(fields: [routeStopId], references: [id])
+
+  @@unique([tripId, routeStopId])
+  @@index([tripId])
+  @@map("trip_stop_times")
+}
+
+model Booking {
+  id                String        @id @default(uuid()) @db.Uuid
+  bookingNumber     String        @unique @map("booking_number")
+  userId            String?       @map("user_id") @db.Uuid
+  contactEmail      String        @map("contact_email")
+  contactPhone      String?       @map("contact_phone")
+  totalAmount       Decimal       @default(0) @map("total_amount") @db.Decimal(10, 2)
+  currency          String        @default("RON") @db.Char(3)
+  paymentStatus     PaymentStatus @default(pending) @map("payment_status")
+  paymentProvider   String?       @map("payment_provider")
+  paymentReference  String?       @map("payment_reference")
+  createdAt         DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt         DateTime      @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  user    Profile? @relation(fields: [userId], references: [id])
+  tickets Ticket[]
+
+  @@index([userId])
+  @@map("bookings")
+}
+
+/// Temporary hold. `segmentRange` (int4range, GENERATED ALWAYS AS STORED) and
+/// the GiST EXCLUDE constraint that makes overlapping segment holds on the
+/// same (trip, seat) impossible are defined only in the raw SQL migration —
+/// Prisma has no representation for either, so this model is read/write via
+/// Prisma Client for normal CRUD but the invariant is enforced by Postgres,
+/// not the ORM.
+model SeatLock {
+  id                        String     @id @default(uuid()) @db.Uuid
+  tripId                    String     @map("trip_id") @db.Uuid
+  seatId                    String     @map("seat_id") @db.Uuid
+  originRouteStopId         String     @map("origin_route_stop_id") @db.Uuid
+  destinationRouteStopId    String     @map("destination_route_stop_id") @db.Uuid
+  originOrderIndex          Int        @map("origin_order_index")
+  destinationOrderIndex     Int        @map("destination_order_index")
+  lockedByUserId            String?    @map("locked_by_user_id") @db.Uuid
+  sessionId                 String     @map("session_id")
+  status                    LockStatus @default(active)
+  expiresAt                 DateTime   @map("expires_at") @db.Timestamptz(6)
+  createdAt                 DateTime   @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  trip        Trip      @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  seat        Seat      @relation(fields: [seatId], references: [id], onDelete: Cascade)
+  originStop  RouteStop @relation("LockOrigin", fields: [originRouteStopId], references: [id])
+  destStop    RouteStop @relation("LockDestination", fields: [destinationRouteStopId], references: [id])
+  lockedBy    Profile?  @relation(fields: [lockedByUserId], references: [id])
+
+  @@index([tripId, seatId])
+  @@index([expiresAt])
+  @@index([sessionId])
+  @@map("seat_locks")
+}
+
+/// Confirmed, potentially offline-verifiable ticket. Same GiST-exclusion
+/// caveat as SeatLock applies to `segmentRange`.
+model Ticket {
+  id                        String       @id @default(uuid()) @db.Uuid
+  ticketNumber               String       @unique @map("ticket_number")
+  bookingId                  String       @map("booking_id") @db.Uuid
+  tripId                      String       @map("trip_id") @db.Uuid
+  seatId                      String       @map("seat_id") @db.Uuid
+  originRouteStopId           String       @map("origin_route_stop_id") @db.Uuid
+  destinationRouteStopId      String       @map("destination_route_stop_id") @db.Uuid
+  originOrderIndex             Int          @map("origin_order_index")
+  destinationOrderIndex        Int          @map("destination_order_index")
+  passengerId                  String?      @map("passenger_id") @db.Uuid
+  passengerFullName            String       @map("passenger_full_name")
+  passengerPhone                String?      @map("passenger_phone")
+  passengerEmail                 String?      @map("passenger_email")
+  fareClass                     FareClass    @default(standard) @map("fare_class")
+  priceAmount                   Decimal      @map("price_amount") @db.Decimal(10, 2)
+  currency                       String       @default("RON") @db.Char(3)
+  status                         TicketStatus @default(reserved)
+  qrPayload                      String       @map("qr_payload")
+  hmacSignature                  String       @map("hmac_signature")
+  signatureKeyVersion             Int          @default(1) @map("signature_key_version") @db.SmallInt
+  issuedAt                        DateTime     @default(now()) @map("issued_at") @db.Timestamptz(6)
+  checkedInAt                     DateTime?    @map("checked_in_at") @db.Timestamptz(6)
+  createdAt                       DateTime     @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt                       DateTime     @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  booking     Booking   @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  trip        Trip      @relation(fields: [tripId], references: [id])
+  seat        Seat      @relation(fields: [seatId], references: [id])
+  originStop  RouteStop @relation("TicketOrigin", fields: [originRouteStopId], references: [id])
+  destStop    RouteStop @relation("TicketDestination", fields: [destinationRouteStopId], references: [id])
+  passenger   Profile?  @relation(fields: [passengerId], references: [id])
+
+  @@index([tripId, seatId])
+  @@index([bookingId])
+  @@index([passengerId])
+  @@map("tickets")
+}
