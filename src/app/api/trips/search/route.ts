@@ -80,6 +80,10 @@ export async function GET(request: NextRequest): Promise<NextResponse<ApiResult<
       routeId: { in: routeIds },
       departureAt: { gte: dayStart, lte: dayEnd },
       status: { in: ["scheduled", "boarding", "delayed"] },
+      // Mirrors the `companies_public_read` RLS policy's own gate: a
+      // pending/suspended/terminated carrier's trips never reach public
+      // search, regardless of how the request path got here.
+      company: { status: "active" },
     },
     include: { company: true, route: true, vehicle: true },
     orderBy: { departureAt: "asc" },

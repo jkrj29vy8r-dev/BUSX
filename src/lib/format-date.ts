@@ -19,3 +19,14 @@ export function formatClockTime(date: Date): string {
   const minutes = date.getMinutes().toString().padStart(2, "0");
   return `${hours}:${minutes}`;
 }
+
+/** "Today" / "Tomorrow" / "Mon, 24 Aug" relative to `now` (defaults to the
+ * moment called) — a departures list showing only clock time can't tell an
+ * operator whether "04:30" is minutes away or a whole day out. */
+export function formatRelativeDay(date: Date, now: Date = new Date()): string {
+  const startOfDay = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  const diffDays = Math.round((startOfDay(date).getTime() - startOfDay(now).getTime()) / 86_400_000);
+  if (diffDays === 0) return "Today";
+  if (diffDays === 1) return "Tomorrow";
+  return formatWeekdayDate(date);
+}

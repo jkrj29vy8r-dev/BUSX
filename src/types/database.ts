@@ -445,6 +445,105 @@ export interface ResolvedStopStub {
 }
 
 // ----------------------------------------------------------------------------
+// Operator dashboard — read/write surface for the carrier's own back office.
+// Scoped by company slug in the URL (no live Supabase Auth project in this
+// environment to gate a real session against; every operator API route
+// still enforces the route/trip actually belongs to the resolved company,
+// which is the tenant boundary that matters — see api/operator/**).
+// ----------------------------------------------------------------------------
+
+export interface OperatorCompanySummary {
+  id: CompanyId;
+  name: string;
+  slug: string;
+  logoUrl: string | null;
+  brandPrimaryColor: HexColor;
+  isVerified: boolean;
+  status: CompanyStatus;
+}
+
+export interface OperatorOverview {
+  company: OperatorCompanySummary;
+  tripsToday: number;
+  seatsSoldToday: number;
+  revenueToday: number;
+  currency: CurrencyCode;
+  liveSeatLocks: number;
+  upcomingDepartures: Array<{
+    tripId: TripId;
+    routeName: string;
+    departureAt: ISODateTime;
+    vehicleType: VehicleTypeEnum;
+    status: TripStatus;
+    seatsSold: number;
+    totalSeats: number;
+  }>;
+}
+
+export interface OperatorRouteSummary {
+  id: RouteId;
+  name: string;
+  slug: string;
+  isActive: boolean;
+  stopCount: number;
+  distanceKm: number | null;
+  upcomingTripCount: number;
+  firstStopCity: string | null;
+  lastStopCity: string | null;
+}
+
+export interface OperatorRouteStop {
+  routeStopId: RouteStopId;
+  stopId: StopId;
+  name: string;
+  city: string;
+  orderIndex: number;
+  arrivalOffsetMinutes: number;
+  departureOffsetMinutes: number;
+}
+
+/** One matrix cell: null `priceAmount` means the operator hasn't priced this
+ * origin/destination pair yet (destination must still be reachable — the
+ * editor only renders cells where destination.orderIndex > origin.orderIndex). */
+export interface OperatorPricingCell {
+  originRouteStopId: RouteStopId;
+  destinationRouteStopId: RouteStopId;
+  priceAmount: number | null;
+  currency: CurrencyCode;
+}
+
+export interface OperatorRouteDetail {
+  id: RouteId;
+  name: string;
+  slug: string;
+  isActive: boolean;
+  distanceKm: number | null;
+  stops: OperatorRouteStop[];
+  /** Flattened matrix cells for `fareClass: "standard"` — the editor's grid
+   * reconstructs the 2D layout client-side from `stops` order. */
+  pricingCells: OperatorPricingCell[];
+}
+
+export interface UpdatePricingCellInput {
+  originRouteStopId: RouteStopId;
+  destinationRouteStopId: RouteStopId;
+  fareClass: FareClass;
+  priceAmount: number;
+}
+
+export interface OperatorTripSummary {
+  id: TripId;
+  routeName: string;
+  vehicleType: VehicleTypeEnum;
+  departureAt: ISODateTime;
+  status: TripStatus;
+  seatsSold: number;
+  totalSeats: number;
+  revenue: number;
+  currency: CurrencyCode;
+}
+
+// ----------------------------------------------------------------------------
 // API envelope types
 // ----------------------------------------------------------------------------
 
