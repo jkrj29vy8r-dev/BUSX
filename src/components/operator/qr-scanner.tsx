@@ -8,12 +8,12 @@ import { useBoardingScan } from "@/hooks/use-operator";
 import type { BoardingScanResult, TripId } from "@/types/database";
 
 const REASON_LABEL: Record<string, string> = {
-  bad_signature: "Signature invalid — not a real BUSX ticket",
-  malformed: "Unreadable code",
-  unknown_key_version: "Signed with an unrecognized key",
-  wrong_trip: "Wrong bus — ticket is for a different trip",
-  not_found: "Ticket not found",
-  not_boardable: "Ticket cancelled, refunded, or expired",
+  bad_signature: "Semnătură invalidă — nu e un bilet BUSX real",
+  malformed: "Cod ilizibil",
+  unknown_key_version: "Semnat cu o cheie necunoscută",
+  wrong_trip: "Autocar greșit — biletul e pentru altă cursă",
+  not_found: "Biletul nu a fost găsit",
+  not_boardable: "Bilet anulat, rambursat sau expirat",
 };
 
 type FlashState = { tone: "green" | "red"; headline: string; detail?: string } | null;
@@ -46,14 +46,14 @@ export function QrScanner({ companySlug, tripId }: QrScannerProps) {
 
   const buildFlash = useCallback((result: BoardingScanResult): FlashState => {
     if (!result.valid) {
-      return { tone: "red", headline: "Reject", detail: REASON_LABEL[result.reason] ?? result.reason };
+      return { tone: "red", headline: "Respins", detail: REASON_LABEL[result.reason] ?? result.reason };
     }
     if (result.alreadyCheckedIn) {
-      return { tone: "red", headline: "Already boarded", detail: `Seat ${result.ticket.seatNumber} · ${result.ticket.passengerName}` };
+      return { tone: "red", headline: "Deja îmbarcat", detail: `Locul ${result.ticket.seatNumber} · ${result.ticket.passengerName}` };
     }
     return {
       tone: "green",
-      headline: `Seat ${result.ticket.seatNumber}`,
+      headline: `Locul ${result.ticket.seatNumber}`,
       detail: `${result.ticket.passengerName} · ${result.ticket.originCity} → ${result.ticket.destinationCity}`,
     };
   }, []);
@@ -75,7 +75,7 @@ export function QrScanner({ companySlug, tripId }: QrScannerProps) {
           }, RESCAN_DELAY_MS);
         },
         onError: () => {
-          setFlash({ tone: "red", headline: "Scan failed", detail: "Network error — try again" });
+          setFlash({ tone: "red", headline: "Scanare eșuată", detail: "Eroare de rețea — încearcă din nou" });
           setTimeout(() => {
             setFlash(null);
             pausedRef.current = false;
@@ -98,7 +98,7 @@ export function QrScanner({ companySlug, tripId }: QrScannerProps) {
         await videoRef.current.play();
         tick();
       } catch {
-        setCameraError("Camera access denied or unavailable. Grant camera permission and reload.");
+        setCameraError("Acces la cameră refuzat sau indisponibil. Permite accesul la cameră și reîncarcă pagina.");
       }
     }
 
@@ -174,7 +174,7 @@ export function QrScanner({ companySlug, tripId }: QrScannerProps) {
         <div className="absolute inset-x-0 top-4 flex justify-center">
           <span className="flex items-center gap-1.5 rounded-full bg-black/60 px-3 py-1 text-[11px] font-semibold text-white">
             <Sparkles className="size-3 animate-pulse" strokeWidth={2} />
-            Verifying…
+            Se verifică…
           </span>
         </div>
       )}
@@ -182,7 +182,7 @@ export function QrScanner({ companySlug, tripId }: QrScannerProps) {
       <div className="absolute inset-x-0 bottom-6 flex justify-center">
         <span className="flex items-center gap-1.5 rounded-full bg-black/60 px-3 py-1.5 text-[11px] font-medium text-white/80">
           <AlertTriangle className="size-3" strokeWidth={2} />
-          Point the camera at the passenger&apos;s ticket QR
+          Îndreaptă camera spre codul QR al biletului pasagerului
         </span>
       </div>
     </div>

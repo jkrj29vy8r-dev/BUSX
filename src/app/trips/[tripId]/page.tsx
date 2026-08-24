@@ -163,13 +163,13 @@ function TripSeatSelectionContent() {
             <section className="flex flex-col gap-4">
               <div className="flex items-center justify-between">
                 <h1 className="text-lg font-bold text-ink">
-                  Choose {passengers > 1 ? `${passengers} seats` : "a seat"}
+                  Alege {passengers > 1 ? `${passengers} locuri` : "un loc"}
                   {originLabel && destinationLabel ? ` · ${originLabel} → ${destinationLabel}` : ""}
                 </h1>
                 {secondsLeft !== null && (
                   <Badge variant={secondsLeft < 60 ? "danger" : "warning"}>
                     <TimerReset className="size-3" strokeWidth={2.25} />
-                    {formatCountdown(secondsLeft)} left to check out
+                    {formatCountdown(secondsLeft)} rămase pentru finalizare
                   </Badge>
                 )}
               </div>
@@ -189,7 +189,7 @@ function TripSeatSelectionContent() {
               {createLock.isError && (
                 <div className="flex items-center gap-2 rounded-md border border-danger/30 bg-danger/[0.06] px-3 py-2 text-sm text-danger">
                   <AlertTriangle className="size-4 shrink-0" strokeWidth={1.75} />
-                  That seat was just taken for this segment — pick another.
+                  Locul tocmai a fost ocupat pentru acest segment — alege altul.
                 </div>
               )}
             </section>
@@ -202,15 +202,15 @@ function TripSeatSelectionContent() {
           <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-4">
             <div>
               <div className="text-sm text-ink-secondary">
-                {selectedSeats.length} / {passengers} {passengers === 1 ? "seat" : "seats"} selected · seat
-                {selectedSeats.length === 1 ? "" : "s"} {selectedSeats.map((s) => s.seatNumber).join(", ")}
+                {selectedSeats.length} / {passengers} {passengers === 1 ? "loc selectat" : "locuri selectate"} ·{" "}
+                {selectedSeats.length === 1 ? "locul" : "locurile"} {selectedSeats.map((s) => s.seatNumber).join(", ")}
               </div>
               <div className="text-xl font-extrabold tabular-nums text-ink">
                 {total.toFixed(0)} <span className="text-sm font-normal text-ink-tertiary">{currency}</span>
               </div>
             </div>
             <Button variant="electric" size="lg" disabled={!readyToCheckout} onClick={() => router.push("/checkout")}>
-              Continue to checkout
+              Continuă spre finalizare
             </Button>
           </div>
         </div>

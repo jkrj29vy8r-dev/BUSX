@@ -14,7 +14,7 @@ interface PassengerStepperProps {
 export function PassengerStepper({ value, onChange, min = 1, max = 9, className }: PassengerStepperProps) {
   return (
     <div className={cn("flex flex-col gap-1.5", className)}>
-      <label className="text-[11px] font-semibold uppercase tracking-wide text-ink-onDarkSecondary">Passengers</label>
+      <label className="text-[11px] font-semibold uppercase tracking-wide text-ink-onDarkSecondary">Pasageri</label>
       <div className="flex h-14 items-center justify-between rounded-md border border-border bg-white px-3.5">
         <span className="flex items-center gap-2 text-md font-medium text-ink">
           <Users className="size-4 text-ink-tertiary" strokeWidth={1.75} />

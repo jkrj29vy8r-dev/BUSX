@@ -29,15 +29,15 @@ export default function ConductorTripPickerPage() {
   return (
     <div className="min-h-screen bg-surface-dark px-6 py-8 text-ink-onDark">
       <div className="mx-auto max-w-sm">
-        <h1 className="text-lg font-bold text-white">Pick a trip to board</h1>
-        <p className="mt-1 text-[13px] text-ink-onDarkSecondary">Departures within the next day.</p>
+        <h1 className="text-lg font-bold text-white">Alege o cursă pentru îmbarcare</h1>
+        <p className="mt-1 text-[13px] text-ink-onDarkSecondary">Plecări în următoarea zi.</p>
 
         {isLoading && <div className="mt-6 h-48 animate-pulse border border-border-dark" />}
 
         {!isLoading && boardable.length === 0 && (
           <div className="mt-8 flex flex-col items-center gap-3 border border-border-dark py-16 text-center">
             <CalendarClock className="size-8 text-ink-onDarkSecondary" strokeWidth={1.25} />
-            <div className="text-sm text-ink-onDarkSecondary">No boardable trips right now</div>
+            <div className="text-sm text-ink-onDarkSecondary">Nicio cursă disponibilă pentru îmbarcare acum</div>
           </div>
         )}
 

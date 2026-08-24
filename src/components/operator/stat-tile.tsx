@@ -24,7 +24,7 @@ export function StatTile({ label, value, icon: Icon, tone = "neutral", live, cla
         {live && (
           <span className="flex items-center gap-1 text-[9px] font-bold uppercase tracking-wide text-emerald">
             <span className="size-1.5 animate-pulse-dot rounded-full bg-emerald" />
-            Live
+            Live acum
           </span>
         )}
       </div>

@@ -19,7 +19,7 @@ export default function OperatorRouteDetailPage() {
         className="mb-4 flex w-fit items-center gap-1 text-xs font-semibold text-ink-onDarkSecondary transition-colors hover:text-white"
       >
         <ChevronLeft className="size-3.5" strokeWidth={2.25} />
-        All routes
+        Toate rutele
       </Link>
 
       {isLoading && <div className="h-64 animate-pulse border border-border-dark bg-surface-dark" />}
@@ -28,20 +28,20 @@ export default function OperatorRouteDetailPage() {
         <>
           <div className="flex items-center gap-2">
             <h1 className="text-lg font-bold tracking-tight text-white">{route.name}</h1>
-            {!route.isActive && <Badge variant="on-dark">Inactive</Badge>}
+            {!route.isActive && <Badge variant="on-dark">Inactivă</Badge>}
           </div>
-          {route.distanceKm && <p className="mt-1 text-sm text-ink-onDarkSecondary">{route.distanceKm.toFixed(0)} km end to end</p>}
+          {route.distanceKm && <p className="mt-1 text-sm text-ink-onDarkSecondary">{route.distanceKm.toFixed(0)} km capăt la capăt</p>}
 
           <div className="mt-6 border border-border-dark p-5">
-            <h2 className="mb-3 text-[11px] font-bold uppercase tracking-wide text-ink-onDarkSecondary">Stop graph</h2>
+            <h2 className="mb-3 text-[11px] font-bold uppercase tracking-wide text-ink-onDarkSecondary">Traseul stațiilor</h2>
             <RouteStopsStrip stops={route.stops} />
           </div>
 
           <div className="mt-8">
-            <h2 className="mb-1 text-[11px] font-bold uppercase tracking-wide text-ink-onDarkSecondary">Segment pricing matrix</h2>
+            <h2 className="mb-1 text-[11px] font-bold uppercase tracking-wide text-ink-onDarkSecondary">Matricea de tarife pe segmente</h2>
             <p className="mb-3 text-sm text-ink-onDarkSecondary">
-              Standard fare, per origin/destination pair. Click any cell to set or change its price — it takes effect
-              immediately for new searches.
+              Tarif standard, pentru fiecare pereche origine/destinație. Apasă pe orice celulă pentru a seta sau
+              schimba prețul — se aplică imediat pentru căutările noi.
             </p>
             <PricingMatrixEditor companySlug={companySlug} routeId={route.id} stops={route.stops} cells={route.pricingCells} />
           </div>

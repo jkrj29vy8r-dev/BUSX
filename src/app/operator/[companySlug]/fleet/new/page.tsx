@@ -15,9 +15,9 @@ export default function NewVehiclePage() {
         className="mb-4 flex w-fit items-center gap-1 text-xs font-semibold text-ink-onDarkSecondary transition-colors hover:text-white"
       >
         <ChevronLeft className="size-3.5" strokeWidth={2.25} />
-        Fleet
+        Flotă
       </Link>
-      <h1 className="mb-6 text-lg font-bold tracking-tight text-white">Build a vehicle</h1>
+      <h1 className="mb-6 text-lg font-bold tracking-tight text-white">Construiește un vehicul</h1>
       <FleetBuilder companySlug={companySlug} />
     </main>
   );

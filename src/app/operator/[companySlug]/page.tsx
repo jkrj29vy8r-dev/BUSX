@@ -19,14 +19,31 @@ const TRIP_STATUS_BADGE: Record<string, "on-dark" | "electric" | "emerald" | "wa
   cancelled: "danger",
 };
 
+const TRIP_STATUS_LABELS: Record<string, string> = {
+  scheduled: "programată",
+  boarding: "îmbarcare",
+  delayed: "întârziată",
+  departed: "plecată",
+  in_transit: "în cursă",
+  completed: "finalizată",
+  cancelled: "anulată",
+};
+
+const COMPANY_STATUS_LABELS: Record<string, string> = {
+  pending: "în așteptare",
+  active: "activ",
+  suspended: "suspendat",
+  terminated: "încheiat",
+};
+
 export default function OperatorOverviewPage() {
   const { companySlug } = useParams<{ companySlug: string }>();
   const { data, isLoading } = useOperatorOverview(companySlug);
 
   return (
     <main className="flex-1 px-8 py-8">
-      <h1 className="text-lg font-bold tracking-tight text-white">Overview</h1>
-      <p className="mt-1 text-[13px] text-ink-onDarkSecondary">Today at a glance, live.</p>
+      <h1 className="text-lg font-bold tracking-tight text-white">Prezentare generală</h1>
+      <p className="mt-1 text-[13px] text-ink-onDarkSecondary">Ziua de azi, pe scurt, în timp real.</p>
 
       {isLoading && (
         <div className="mt-6 grid grid-cols-1 gap-px border border-border-dark bg-border-dark sm:grid-cols-2 lg:grid-cols-4">
@@ -39,29 +56,29 @@ export default function OperatorOverviewPage() {
       {data && (
         <>
           <div className="mt-6 grid grid-cols-1 gap-px border border-border-dark bg-border-dark sm:grid-cols-2 lg:grid-cols-4">
-            <StatTile className="border-0" label="Trips departing today" value={String(data.tripsToday)} icon={CalendarClock} />
-            <StatTile className="border-0" label="Seats sold today" value={String(data.seatsSoldToday)} icon={Ticket} tone="electric" />
+            <StatTile className="border-0" label="Curse azi" value={String(data.tripsToday)} icon={CalendarClock} />
+            <StatTile className="border-0" label="Locuri vândute azi" value={String(data.seatsSoldToday)} icon={Ticket} tone="electric" />
             <StatTile
               className="border-0"
-              label="Revenue today"
+              label="Venit azi"
               value={`${data.revenueToday.toFixed(0)} ${data.currency}`}
               icon={Wallet}
               tone="emerald"
             />
-            <StatTile className="border-0" label="Active seat holds right now" value={String(data.liveSeatLocks)} icon={Radio} tone="emerald" live />
+            <StatTile className="border-0" label="Rezervări active acum" value={String(data.liveSeatLocks)} icon={Radio} tone="emerald" live />
           </div>
 
           <div className="mt-8">
             <div className="mb-3 flex items-center justify-between">
-              <h2 className="text-[11px] font-bold uppercase tracking-wide text-ink-onDarkSecondary">Next departures</h2>
+              <h2 className="text-[11px] font-bold uppercase tracking-wide text-ink-onDarkSecondary">Următoarele plecări</h2>
               <Link href={`/operator/${companySlug}/trips`} className="text-xs font-semibold text-[#6FA6FF] hover:text-white">
-                View all trips
+                Vezi toate cursele
               </Link>
             </div>
 
             <div className="border border-border-dark">
               {data.upcomingDepartures.length === 0 && (
-                <div className="p-8 text-center text-sm text-ink-onDarkSecondary">No upcoming departures scheduled.</div>
+                <div className="p-8 text-center text-sm text-ink-onDarkSecondary">Nicio plecare programată.</div>
               )}
               {data.upcomingDepartures.map((trip, i) => (
                 <div
@@ -80,9 +97,9 @@ export default function OperatorOverviewPage() {
                   </div>
                   <div className="flex items-center gap-4">
                     <div className="text-xs text-ink-onDarkSecondary">
-                      <span className="font-mono font-semibold text-white">{trip.seatsSold}</span> / {trip.totalSeats} seats
+                      <span className="font-mono font-semibold text-white">{trip.seatsSold}</span> / {trip.totalSeats} locuri
                     </div>
-                    <Badge variant={TRIP_STATUS_BADGE[trip.status] ?? "on-dark"}>{trip.status.replace("_", " ")}</Badge>
+                    <Badge variant={TRIP_STATUS_BADGE[trip.status] ?? "on-dark"}>{TRIP_STATUS_LABELS[trip.status] ?? trip.status}</Badge>
                   </div>
                 </div>
               ))}
@@ -92,13 +109,13 @@ export default function OperatorOverviewPage() {
           {data.company.status !== "active" && (
             <div className="mt-6 flex items-center gap-2 border border-danger/30 bg-danger/[0.06] px-4 py-3 text-sm text-danger">
               <ShieldCheck className="size-4 shrink-0" strokeWidth={1.75} />
-              Account status is &ldquo;{data.company.status}&rdquo; — your trips won&apos;t appear in passenger search until it&apos;s active.
+              Statusul contului este „{COMPANY_STATUS_LABELS[data.company.status] ?? data.company.status}” — cursele tale nu vor apărea în căutările pasagerilor până nu devine activ.
             </div>
           )}
           {data.company.status === "active" && !data.company.isVerified && (
             <div className="mt-6 flex items-center gap-2 border border-warning/30 bg-warning/[0.06] px-4 py-3 text-sm text-warning">
               <ShieldCheck className="size-4 shrink-0" strokeWidth={1.75} />
-              Your carrier isn&apos;t verified yet — trips are searchable, but passengers won&apos;t see the verified badge until it completes.
+              Operatorul tău nu este încă verificat — cursele pot fi căutate, dar pasagerii nu vor vedea insigna de verificare până la finalizare.
             </div>
           )}
         </>

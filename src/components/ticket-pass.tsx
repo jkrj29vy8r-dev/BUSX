@@ -39,11 +39,11 @@ const toneDot: Record<LiveStatusTone, string> = {
 };
 
 /**
- * PassKit-style wallet pass. "Add to Wallet" is presented honestly: real
+ * PassKit-style wallet pass. "Adaugă în Wallet" is presented honestly: real
  * Apple/Google Wallet passes require an operator-signed .pkpass/.json
  * bundle from a paid Apple Developer certificate this environment doesn't
  * hold, so the button surfaces that instead of pretending to generate one.
- * "Download PDF" is fully real — it prints just this card via the
+ * "Descarcă PDF" is fully real — it prints just this card via the
  * `[data-print-active]` rule in globals.css (browser "Save as PDF").
  */
 export function TicketPass({
@@ -102,7 +102,9 @@ export function TicketPass({
           </span>
           <div>
             <div className="text-sm font-bold leading-none">{companyName}</div>
-            <div className="mt-0.5 text-[10px] uppercase tracking-wider text-ink-onDarkSecondary">BUSX Pass</div>
+            <div className="mt-0.5 text-[10px] uppercase tracking-wider text-ink-onDarkSecondary">
+              BUS<span className="text-emerald">X</span> Pass
+            </div>
           </div>
         </div>
         {isVip && (
@@ -129,9 +131,9 @@ export function TicketPass({
       </div>
 
       <div className="relative mt-4 grid grid-cols-3 gap-3 px-5">
-        <PassField label="Seat" value={ticket.seat_number} />
-        <PassField label="Passenger" value={ticket.passenger_full_name.split(" ")[0] ?? ticket.passenger_full_name} />
-        <PassField label="Fare" value={`${ticket.price_amount.toFixed(0)} ${ticket.currency}`} />
+        <PassField label="Loc" value={ticket.seat_number} />
+        <PassField label="Pasager" value={ticket.passenger_full_name.split(" ")[0] ?? ticket.passenger_full_name} />
+        <PassField label="Tarif" value={`${ticket.price_amount.toFixed(0)} ${ticket.currency}`} />
       </div>
 
       <div className="relative mt-4 flex items-center gap-2 px-5">
@@ -156,17 +158,17 @@ export function TicketPass({
           <QrCode value={qrValue} size={148} />
         </div>
         <div className="font-mono text-xs tracking-wide text-ink-onDarkSecondary">{ticket.ticket_number}</div>
-        <div className="text-[10px] uppercase tracking-wider text-ink-onDarkSecondary/70">Scan to board — verifies offline</div>
+        <div className="text-[10px] uppercase tracking-wider text-ink-onDarkSecondary/70">Se scanează la urcare — verificare offline</div>
       </div>
 
       <div className="relative flex gap-2 border-t border-border-dark px-5 py-4">
         <Button variant="ghost-dark" size="sm" className="flex-1" onClick={() => setWalletNoticeOpen((v) => !v)}>
           <Wallet className="size-3.5" strokeWidth={1.75} />
-          Add to Wallet
+          Adaugă în Wallet
         </Button>
         <Button variant="electric" size="sm" className="flex-1" onClick={handleDownloadPdf}>
           <Download className="size-3.5" strokeWidth={1.75} />
-          Download PDF
+          Descarcă PDF
         </Button>
       </div>
 
@@ -176,10 +178,10 @@ export function TicketPass({
           animate={{ opacity: 1, height: "auto" }}
           className="relative overflow-hidden px-5 pb-4 text-[11px] leading-relaxed text-ink-onDarkSecondary"
         >
-          Native Apple/Google Wallet passes require the operator to sign a
-          pass bundle with their own Wallet developer certificate — that
-          isn&apos;t wired up yet. Use Download PDF for now; this ticket&apos;s QR
-          scans the same either way.
+          Permisele native pentru Apple/Google Wallet necesită ca operatorul
+          să semneze un pachet cu propriul certificat de dezvoltator Wallet —
+          asta nu e încă disponibil. Folosește Descarcă PDF deocamdată;
+          codul QR al biletului se scanează la fel oricum.
         </motion.div>
       )}
     </div>

@@ -74,15 +74,15 @@ export function SeatPicker({
             <div className="flex items-center justify-between border-b-2 border-dashed border-ink/10 bg-surface-inset px-4 py-2.5">
               <div className="flex items-center gap-1.5 text-ink-tertiary">
                 <SteeringWheel className="size-4" />
-                <span className="text-[10px] font-bold uppercase tracking-wide">Driver</span>
+                <span className="text-[10px] font-bold uppercase tracking-wide">Șofer</span>
               </div>
               {byDeck.length > 1 && (
                 <span className="text-[10px] font-bold uppercase tracking-wide text-ink-tertiary">
-                  {deck === 1 ? "Lower deck" : `Deck ${deck}`}
+                  {deck === 1 ? "Etaj inferior" : `Etaj ${deck}`}
                 </span>
               )}
               <div className="flex items-center gap-1.5 text-ink-tertiary">
-                <span className="text-[10px] font-bold uppercase tracking-wide">Door</span>
+                <span className="text-[10px] font-bold uppercase tracking-wide">Ușă</span>
                 <DoorOpen className="size-4" strokeWidth={1.75} />
               </div>
             </div>
@@ -155,7 +155,7 @@ function SeatGlyph({
       whileTap={isDisabled ? undefined : { scale: 0.92 }}
       animate={isSelected ? { scale: [1, 1.08, 1] } : { scale: 1 }}
       transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
-      title={`Seat ${seat.seatNumber}${isVip ? " · VIP" : ""}${isBlocked ? " · taken for this segment" : ""}`}
+      title={`Locul ${seat.seatNumber}${isVip ? " · VIP" : ""}${isBlocked ? " · ocupat pentru acest segment" : ""}`}
       className={cn("relative flex size-10 items-center justify-center", className)}
     >
       {/* headrest */}
@@ -216,9 +216,9 @@ function SeatPickerLegend({
 }) {
   return (
     <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-ink-tertiary">
-      <LegendItem swatch="border-2 border-ink/15 bg-white" label={standardPriceAmount != null ? `Available · ${standardPriceAmount.toFixed(0)} ${currency}` : "Available"} />
-      <LegendItem swatch="border-2 border-electric bg-electric" label="Selected" />
-      <LegendItem swatch="border-2 border-transparent bg-ink/[0.06]" label="Taken for this segment" />
+      <LegendItem swatch="border-2 border-ink/15 bg-white" label={standardPriceAmount != null ? `Liber · ${standardPriceAmount.toFixed(0)} ${currency}` : "Liber"} />
+      <LegendItem swatch="border-2 border-electric bg-electric" label="Selectat" />
+      <LegendItem swatch="border-2 border-transparent bg-ink/[0.06]" label="Ocupat pentru acest segment" />
       {hasVipPricing && (
         <LegendItem
           swatch="border-2 border-gold bg-gold/10"

@@ -117,7 +117,7 @@ export function MapPinPreview({ stops, highlightIndex, className, dark }: MapPin
           dark ? "text-white/40" : "text-ink-tertiary/70"
         )}
       >
-        Route preview
+        Previzualizare traseu
       </div>
     </div>
   );

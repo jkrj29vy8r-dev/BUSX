@@ -68,14 +68,14 @@ export function SearchHero() {
         <div className="mb-6 flex items-center gap-2">
           <span className="h-1.5 w-1.5 animate-pulse-dot rounded-full bg-emerald" />
           <span className="text-xs font-semibold uppercase tracking-wide text-ink-onDarkSecondary">
-            Live across every operator
+            Live, la toți operatorii
           </span>
         </div>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-3">
           <div className="relative grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <StopAutocomplete label="From" placeholder="Origin city or station" value={origin} onChange={setOrigin} />
-            <StopAutocomplete label="To" placeholder="Destination city or station" value={destination} onChange={setDestination} />
+            <StopAutocomplete label="De la" placeholder="Oraș sau stație de plecare" value={origin} onChange={setOrigin} />
+            <StopAutocomplete label="Până la" placeholder="Oraș sau stație de destinație" value={destination} onChange={setDestination} />
 
             <div className="absolute left-1/2 top-1/2 z-10 hidden -translate-x-1/2 translate-y-1 sm:block">
               <RouteSwapButton onSwap={handleSwap} />
@@ -87,7 +87,7 @@ export function SearchHero() {
 
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-[1.4fr_1fr_auto]">
             <div className="flex flex-col gap-1.5">
-              <label className="text-[11px] font-semibold uppercase tracking-wide text-ink-onDarkSecondary">Departure</label>
+              <label className="text-[11px] font-semibold uppercase tracking-wide text-ink-onDarkSecondary">Data plecării</label>
               <Popover open={datePopoverOpen} onOpenChange={setDatePopoverOpen}>
                 <PopoverTrigger asChild>
                   <button
@@ -125,7 +125,7 @@ export function SearchHero() {
                 className="h-14 w-full gap-2 sm:w-auto sm:px-8"
               >
                 <SearchIcon className="size-4" strokeWidth={2.25} />
-                Search
+                Caută
               </Button>
             </motion.div>
           </div>

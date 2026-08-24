@@ -72,12 +72,12 @@ export function MetroTimeline({ stops, originOrderIndex, destinationOrderIndex, 
                   {s.name}
                   {isOrigin && (
                     <span className="ml-2 rounded-full bg-electric-muted px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-electric">
-                      Board
+                      Urcare
                     </span>
                   )}
                   {isDestination && (
                     <span className="ml-2 rounded-full bg-emerald-muted px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-emerald-hover">
-                      Alight
+                      Coborâre
                     </span>
                   )}
                 </div>

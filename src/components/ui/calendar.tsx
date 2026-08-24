@@ -1,6 +1,7 @@
 "use client";
 
 import { DayPicker } from "react-day-picker";
+import { ro } from "date-fns/locale";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/cn";
 
@@ -10,6 +11,7 @@ export function Calendar({ className, classNames, ...props }: CalendarProps) {
   return (
     <DayPicker
       showOutsideDays
+      locale={ro}
       className={cn("p-0", className)}
       classNames={{
         months: "flex flex-col",

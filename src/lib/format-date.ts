@@ -7,8 +7,8 @@
  * mismatch on every load. Fixed lookup tables can't disagree with themselves.
  */
 
-const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+const WEEKDAYS = ["Dum", "Lun", "Mar", "Mie", "Joi", "Vin", "Sâm"];
+const MONTHS = ["Ian", "Feb", "Mar", "Apr", "Mai", "Iun", "Iul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
 export function formatWeekdayDate(date: Date): string {
   return `${WEEKDAYS[date.getDay()]}, ${date.getDate()} ${MONTHS[date.getMonth()]}`;
@@ -20,13 +20,13 @@ export function formatClockTime(date: Date): string {
   return `${hours}:${minutes}`;
 }
 
-/** "Today" / "Tomorrow" / "Mon, 24 Aug" relative to `now` (defaults to the
+/** "Astăzi" / "Mâine" / "Lun, 24 Aug" relative to `now` (defaults to the
  * moment called) — a departures list showing only clock time can't tell an
  * operator whether "04:30" is minutes away or a whole day out. */
 export function formatRelativeDay(date: Date, now: Date = new Date()): string {
   const startOfDay = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
   const diffDays = Math.round((startOfDay(date).getTime() - startOfDay(now).getTime()) / 86_400_000);
-  if (diffDays === 0) return "Today";
-  if (diffDays === 1) return "Tomorrow";
+  if (diffDays === 0) return "Astăzi";
+  if (diffDays === 1) return "Mâine";
   return formatWeekdayDate(date);
 }

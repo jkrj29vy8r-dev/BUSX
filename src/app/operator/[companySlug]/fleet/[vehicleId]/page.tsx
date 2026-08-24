@@ -17,9 +17,9 @@ export default function EditVehiclePage() {
         className="mb-4 flex w-fit items-center gap-1 text-xs font-semibold text-ink-onDarkSecondary transition-colors hover:text-white"
       >
         <ChevronLeft className="size-3.5" strokeWidth={2.25} />
-        Fleet
+        Flotă
       </Link>
-      <h1 className="mb-6 text-lg font-bold tracking-tight text-white">Edit vehicle</h1>
+      <h1 className="mb-6 text-lg font-bold tracking-tight text-white">Editează vehiculul</h1>
       {isLoading && <div className="h-96 animate-pulse border border-border-dark bg-surface-dark" />}
       {vehicle && <FleetBuilder companySlug={companySlug} vehicle={vehicle} />}
     </main>

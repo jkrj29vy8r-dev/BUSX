@@ -55,7 +55,7 @@ export function PricingMatrixEditor({ companySlug, routeId, stops, cells }: Pric
         <thead>
           <tr>
             <th className="sticky left-0 z-10 border-b border-r border-border-dark bg-surface-dark-raised px-3 py-2.5 text-left text-[10px] font-bold uppercase tracking-wide text-ink-onDarkSecondary">
-              Origin \ Destination
+              Origine \ Destinație
             </th>
             {sorted.map((dest) => (
               <th
@@ -131,7 +131,7 @@ export function PricingMatrixEditor({ companySlug, routeId, stops, cells }: Pric
                           <Loader2 className="mx-auto size-3.5 animate-spin" />
                         ) : (
                           <>
-                            <span>{cell.priceAmount != null ? `${cell.priceAmount.toFixed(0)} ${cell.currency}` : "Set price"}</span>
+                            <span>{cell.priceAmount != null ? `${cell.priceAmount.toFixed(0)} ${cell.currency}` : "Setează preț"}</span>
                             <Pencil className="size-3 opacity-0 transition-opacity group-hover:opacity-100" strokeWidth={2} />
                           </>
                         )}

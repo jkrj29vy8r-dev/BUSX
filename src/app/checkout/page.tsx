@@ -110,7 +110,7 @@ export default function CheckoutPage() {
           <div className="mx-auto mb-4 flex size-14 items-center justify-center rounded-full bg-emerald-muted text-emerald-hover">
             <CheckCircle2 className="size-7" strokeWidth={1.75} />
           </div>
-          <h1 className="text-xl font-extrabold text-ink">Booking confirmed</h1>
+          <h1 className="text-xl font-extrabold text-ink">Rezervare confirmată</h1>
           <p className="mt-1 font-mono text-sm text-ink-secondary">{result.booking.booking_number}</p>
 
           <div className="mt-8 flex flex-col items-center gap-6">
@@ -135,7 +135,7 @@ export default function CheckoutPage() {
           </div>
 
           <Button variant="secondary" size="md" className="mt-10" onClick={() => router.push("/")}>
-            Back to home
+            Înapoi acasă
           </Button>
         </main>
       </div>
@@ -147,9 +147,9 @@ export default function CheckoutPage() {
       <div className="min-h-screen">
         <Nav />
         <main className="mx-auto max-w-lg px-6 py-16 text-center">
-          <p className="text-sm text-ink-secondary">No seats selected yet.</p>
+          <p className="text-sm text-ink-secondary">Niciun loc selectat încă.</p>
           <Button variant="secondary" size="md" className="mt-4" onClick={() => router.push("/")}>
-            Start a search
+            Începe o căutare
           </Button>
         </main>
       </div>
@@ -160,7 +160,7 @@ export default function CheckoutPage() {
     <div className="min-h-screen">
       <Nav />
       <main className="mx-auto max-w-lg px-6 py-8">
-        <h1 className="mb-6 text-lg font-bold text-ink">Passenger details</h1>
+        <h1 className="mb-6 text-lg font-bold text-ink">Detalii pasageri</h1>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-6">
           <div className="flex flex-col gap-3">
@@ -171,7 +171,7 @@ export default function CheckoutPage() {
                 </span>
                 <Input
                   icon={<User className="size-4" strokeWidth={1.75} />}
-                  placeholder="Full name, as on ID"
+                  placeholder="Nume complet, ca în actul de identitate"
                   value={row.fullName}
                   onChange={(e) => updateName(row.seatLockId, e.target.value)}
                   required
@@ -181,22 +181,22 @@ export default function CheckoutPage() {
           </div>
 
           <div className="flex flex-col gap-3 border-t border-border pt-6">
-            <Input type="email" placeholder="Contact email" value={contactEmail} onChange={(e) => setContactEmail(e.target.value)} required />
-            <Input type="tel" placeholder="Contact phone (optional)" value={contactPhone} onChange={(e) => setContactPhone(e.target.value)} />
+            <Input type="email" placeholder="Email de contact" value={contactEmail} onChange={(e) => setContactEmail(e.target.value)} required />
+            <Input type="tel" placeholder="Telefon de contact (opțional)" value={contactPhone} onChange={(e) => setContactPhone(e.target.value)} />
           </div>
 
           {createBooking.isError && (
             <div className="rounded-md border border-danger/30 bg-danger/[0.06] px-3 py-2 text-sm text-danger">
               {holdExpired
-                ? "Your seat hold expired or was taken by someone else — it's been released. Please search again."
+                ? "Rezervarea locului a expirat sau a fost preluată de altcineva — a fost eliberată. Te rugăm să cauți din nou."
                 : createBooking.error instanceof Error
                   ? createBooking.error.message
-                  : "Checkout failed — please try again."}
+                  : "Finalizarea comenzii a eșuat — te rugăm să încerci din nou."}
             </div>
           )}
 
           <div className="flex items-center justify-between border-t border-border pt-4">
-            <div className="text-md text-ink-secondary">Total</div>
+            <div className="text-md text-ink-secondary">Total de plată</div>
             <div className="text-xl font-extrabold tabular-nums text-ink">
               {total.toFixed(0)} <span className="text-sm font-normal text-ink-tertiary">RON</span>
             </div>
@@ -204,12 +204,12 @@ export default function CheckoutPage() {
 
           {holdExpired ? (
             <Button type="button" variant="secondary" size="lg" onClick={() => router.push("/")}>
-              Start a new search
+              Începe o căutare nouă
             </Button>
           ) : (
             <Button type="submit" variant="electric" size="lg" disabled={!canSubmit || createBooking.isPending}>
               {createBooking.isPending && <Loader2 className="size-4 animate-spin" />}
-              Confirm and pay
+              Confirmă și plătește
             </Button>
           )}
         </form>

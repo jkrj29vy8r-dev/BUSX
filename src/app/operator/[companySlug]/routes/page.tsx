@@ -12,8 +12,8 @@ export default function OperatorRoutesPage() {
 
   return (
     <main className="flex-1 px-8 py-8">
-      <h1 className="text-lg font-bold tracking-tight text-white">Routes &amp; pricing</h1>
-      <p className="mt-1 text-[13px] text-ink-onDarkSecondary">Every stop graph you operate, and the segment price matrix behind it.</p>
+      <h1 className="text-lg font-bold tracking-tight text-white">Rute și tarife</h1>
+      <p className="mt-1 text-[13px] text-ink-onDarkSecondary">Fiecare traseu pe care îl operezi, cu matricea de tarife pe segmente.</p>
 
       {isLoading && (
         <div className="mt-6 flex flex-col gap-px">
@@ -26,7 +26,7 @@ export default function OperatorRoutesPage() {
       {routes?.length === 0 && (
         <div className="mt-8 flex flex-col items-center gap-3 border border-border-dark py-16 text-center">
           <GitBranch className="size-8 text-ink-onDarkSecondary" strokeWidth={1.25} />
-          <div className="text-md font-medium text-white">No routes yet</div>
+          <div className="text-md font-medium text-white">Nicio rută încă</div>
         </div>
       )}
 
@@ -40,16 +40,16 @@ export default function OperatorRoutesPage() {
             <div>
               <div className="flex items-center gap-2">
                 <span className="text-md font-bold text-white">{route.name}</span>
-                {!route.isActive && <Badge variant="on-dark">Inactive</Badge>}
+                {!route.isActive && <Badge variant="on-dark">Inactivă</Badge>}
               </div>
               <div className="mt-1 flex items-center gap-1.5 text-sm text-ink-onDarkSecondary">
                 {route.firstStopCity} <ArrowRight className="size-3" strokeWidth={2} /> {route.lastStopCity}
               </div>
               <div className="mt-2 flex items-center gap-4 text-xs text-ink-onDarkSecondary">
-                <span>{route.stopCount} stops</span>
+                <span>{route.stopCount} stații</span>
                 {route.distanceKm && <span>{route.distanceKm.toFixed(0)} km</span>}
                 <span>
-                  {route.upcomingTripCount} upcoming {route.upcomingTripCount === 1 ? "trip" : "trips"}
+                  {route.upcomingTripCount} {route.upcomingTripCount === 1 ? "cursă programată" : "curse programate"}
                 </span>
               </div>
             </div>

@@ -64,7 +64,7 @@ export function RouteTimelineBar({ stops, originOrderIndex, destinationOrderInde
         </div>
         {between > 0 && (
           <div className="rounded-full bg-ink/[0.05] px-2 py-0.5 text-[11px] font-semibold text-ink-tertiary">
-            {between} stop{between === 1 ? "" : "s"} between
+            {between} {between === 1 ? "stație" : "stații"} intermediare
           </div>
         )}
         <div className="text-right">
@@ -119,7 +119,7 @@ export function RouteTimelineBar({ stops, originOrderIndex, destinationOrderInde
 
       {totalStops > 2 && (
         <div className="text-xs text-ink-tertiary">
-          {totalStops} stops on this route · boarding at stop {originOrderIndex - rangeStart + 1}, alighting at stop{" "}
+          {totalStops} stații pe acest traseu · urcare la stația {originOrderIndex - rangeStart + 1}, coborâre la stația{" "}
           {destinationOrderIndex - rangeStart + 1}
         </div>
       )}

@@ -43,8 +43,8 @@ function SearchResultsContent() {
 
   const originStopId = params.get("originStopId") as StopId | null;
   const destinationStopId = params.get("destinationStopId") as StopId | null;
-  const originLabel = params.get("originLabel") ?? "Origin";
-  const destinationLabel = params.get("destinationLabel") ?? "Destination";
+  const originLabel = params.get("originLabel") ?? "Plecare";
+  const destinationLabel = params.get("destinationLabel") ?? "Destinație";
   const date = params.get("date") ?? new Date().toISOString().slice(0, 10);
   const passengers = Number(params.get("passengers") ?? "1");
 
@@ -72,10 +72,10 @@ function SearchResultsContent() {
             </span>
             <span className="flex items-center gap-1.5">
               <Users className="size-3.5" strokeWidth={1.5} />
-              {passengers} {passengers === 1 ? "passenger" : "passengers"}
+              {passengers} {passengers === 1 ? "pasager" : "pasageri"}
             </span>
             <Button variant="ghost" size="sm" onClick={() => router.push("/")} className="ml-auto">
-              Modify search
+              Modifică căutarea
             </Button>
           </div>
         </div>
@@ -90,16 +90,16 @@ function SearchResultsContent() {
 
         {isError && (
           <div className="rounded-lg border border-danger/30 bg-danger/[0.06] p-6 text-sm text-danger">
-            Something went wrong loading trips. Please try again.
+            A apărut o eroare la încărcarea curselor. Te rugăm să încerci din nou.
           </div>
         )}
 
         {!isLoading && !isError && results?.length === 0 && (
           <div className="flex flex-col items-center gap-3 rounded-lg border border-border bg-surface py-16 text-center">
             <SearchX className="size-8 text-ink-tertiary" strokeWidth={1.25} />
-            <div className="text-md font-medium text-ink">No trips found</div>
+            <div className="text-md font-medium text-ink">Nicio cursă găsită</div>
             <p className="max-w-sm text-sm text-ink-secondary">
-              No sellable departures between {originLabel} and {destinationLabel} on {formatDateLabel(date)}. Try another date.
+              Nu există plecări disponibile între {originLabel} și {destinationLabel} pe {formatDateLabel(date)}. Încearcă altă dată.
             </p>
           </div>
         )}

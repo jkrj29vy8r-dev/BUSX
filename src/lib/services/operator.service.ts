@@ -333,21 +333,21 @@ export async function updateOperatorCompanyProfile(
 // ============================================================================
 
 export class VehicleHasBookingHistoryError extends Error {
-  constructor(message = "This vehicle has ticket history — its layout can no longer be edited") {
+  constructor(message = "Acest vehicul are bilete emise — planul său de locuri nu mai poate fi editat") {
     super(message);
     this.name = "VehicleHasBookingHistoryError";
   }
 }
 
 export class DuplicateRegistrationPlateError extends Error {
-  constructor(message = "Another vehicle already uses this registration plate") {
+  constructor(message = "Un alt vehicul folosește deja acest număr de înmatriculare") {
     super(message);
     this.name = "DuplicateRegistrationPlateError";
   }
 }
 
 export class EmptyVehicleLayoutError extends Error {
-  constructor(message = "A vehicle needs at least one bookable seat") {
+  constructor(message = "Un vehicul are nevoie de cel puțin un loc rezervabil") {
     super(message);
     this.name = "EmptyVehicleLayoutError";
   }

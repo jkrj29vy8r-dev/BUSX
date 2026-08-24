@@ -17,6 +17,16 @@ const TRIP_STATUS_BADGE: Record<string, "on-dark" | "electric" | "emerald" | "wa
   cancelled: "danger",
 };
 
+const TRIP_STATUS_LABELS: Record<string, string> = {
+  scheduled: "programată",
+  boarding: "îmbarcare",
+  delayed: "întârziată",
+  departed: "plecată",
+  in_transit: "în cursă",
+  completed: "finalizată",
+  cancelled: "anulată",
+};
+
 export default function OperatorTripsPage() {
   const { companySlug } = useParams<{ companySlug: string }>();
   const router = useRouter();
@@ -24,15 +34,15 @@ export default function OperatorTripsPage() {
 
   return (
     <main className="flex-1 px-8 py-8">
-      <h1 className="text-lg font-bold tracking-tight text-white">Trips</h1>
-      <p className="mt-1 text-[13px] text-ink-onDarkSecondary">Most recent 50, newest departure first. Click a run to open its manifest.</p>
+      <h1 className="text-lg font-bold tracking-tight text-white">Curse</h1>
+      <p className="mt-1 text-[13px] text-ink-onDarkSecondary">Ultimele 50, cu cea mai recentă plecare primă. Apasă pe o cursă pentru a-i deschide manifestul.</p>
 
       {isLoading && <div className="mt-6 h-64 animate-pulse border border-border-dark bg-surface-dark" />}
 
       {trips?.length === 0 && (
         <div className="mt-8 flex flex-col items-center gap-3 border border-border-dark py-16 text-center">
           <CalendarClock className="size-8 text-ink-onDarkSecondary" strokeWidth={1.25} />
-          <div className="text-md font-medium text-white">No trips scheduled</div>
+          <div className="text-md font-medium text-white">Nicio cursă programată</div>
         </div>
       )}
 
@@ -41,12 +51,12 @@ export default function OperatorTripsPage() {
           <table className="w-full border-collapse text-sm">
             <thead>
               <tr className="border-b border-border-dark bg-surface-dark-raised text-left text-[10px] font-bold uppercase tracking-wide text-ink-onDarkSecondary">
-                <th className="px-4 py-2.5">Departure</th>
-                <th className="px-4 py-2.5">Route</th>
-                <th className="px-4 py-2.5">Vehicle</th>
+                <th className="px-4 py-2.5">Plecare</th>
+                <th className="px-4 py-2.5">Rută</th>
+                <th className="px-4 py-2.5">Vehicul</th>
                 <th className="px-4 py-2.5">Status</th>
-                <th className="px-4 py-2.5 text-right">Seats sold</th>
-                <th className="px-4 py-2.5 text-right">Revenue</th>
+                <th className="px-4 py-2.5 text-right">Locuri vândute</th>
+                <th className="px-4 py-2.5 text-right">Venit</th>
               </tr>
             </thead>
             <tbody>
@@ -68,7 +78,7 @@ export default function OperatorTripsPage() {
                       <Badge variant="on-dark">{VEHICLE_TYPE_LABELS[trip.vehicleType]}</Badge>
                     </td>
                     <td className="px-4 py-3">
-                      <Badge variant={TRIP_STATUS_BADGE[trip.status] ?? "on-dark"}>{trip.status.replace("_", " ")}</Badge>
+                      <Badge variant={TRIP_STATUS_BADGE[trip.status] ?? "on-dark"}>{TRIP_STATUS_LABELS[trip.status] ?? trip.status}</Badge>
                     </td>
                     <td className="px-4 py-3 text-right">
                       <span className="font-mono tabular-nums text-white">

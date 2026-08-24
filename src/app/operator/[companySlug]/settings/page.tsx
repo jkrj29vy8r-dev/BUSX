@@ -60,11 +60,11 @@ export default function OperatorSettingsPage() {
     if (!file) return;
     setLogoError(null);
     if (!file.type.startsWith("image/")) {
-      setLogoError("Logo must be an image file");
+      setLogoError("Logo-ul trebuie să fie un fișier imagine");
       return;
     }
     if (file.size > MAX_LOGO_BYTES) {
-      setLogoError(`Logo must be under ${Math.round(MAX_LOGO_BYTES / 1000)}KB`);
+      setLogoError(`Logo-ul trebuie să fie sub ${Math.round(MAX_LOGO_BYTES / 1000)}KB`);
       return;
     }
     const reader = new FileReader();
@@ -92,46 +92,46 @@ export default function OperatorSettingsPage() {
 
   return (
     <main className="flex-1 px-8 py-8">
-      <h1 className="text-lg font-bold tracking-tight text-white">Carrier profile</h1>
-      <p className="mt-1 text-[13px] text-ink-onDarkSecondary">Legal identity, branding, and who a driver calls when something goes wrong.</p>
+      <h1 className="text-lg font-bold tracking-tight text-white">Profil operator</h1>
+      <p className="mt-1 text-[13px] text-ink-onDarkSecondary">Identitate juridică, brand și pe cine sună un șofer atunci când ceva nu merge bine.</p>
 
       {isLoading && <div className="mt-6 h-96 animate-pulse border border-border-dark bg-surface-dark" />}
 
       {profile && (
         <form onSubmit={handleSubmit} className="mt-6 flex max-w-2xl flex-col gap-8">
           <section className="border border-border-dark p-5">
-            <h2 className="mb-4 text-[11px] font-bold uppercase tracking-wide text-ink-onDarkSecondary">Identity</h2>
+            <h2 className="mb-4 text-[11px] font-bold uppercase tracking-wide text-ink-onDarkSecondary">Identitate</h2>
             <div className="flex items-start gap-4">
               <div className="flex flex-col items-center gap-2">
                 <div className="flex size-16 items-center justify-center overflow-hidden border border-border-dark bg-white/[0.03]">
                   {logoUrl ? (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img src={logoUrl} alt="Carrier logo" className="size-full object-contain" />
+                    <img src={logoUrl} alt="Logo operator" className="size-full object-contain" />
                   ) : (
                     <span className="text-lg font-bold text-ink-onDarkSecondary">{profile.name.slice(0, 1)}</span>
                   )}
                 </div>
                 <label className="flex cursor-pointer items-center gap-1 text-[11px] font-semibold text-[#6FA6FF] hover:text-white">
                   <Upload className="size-3" strokeWidth={2} />
-                  Upload
+                  Încarcă
                   <input type="file" accept="image/*" className="hidden" onChange={handleLogoChange} />
                 </label>
               </div>
 
               <div className="grid flex-1 grid-cols-2 gap-4">
-                <Field label="Registered name">
+                <Field label="Denumire înregistrată">
                   <DarkInput value={profile.name} disabled />
                 </Field>
-                <Field label="Legal name">
+                <Field label="Denumire juridică">
                   <DarkInput value={legalName} onChange={(e) => setLegalName(e.target.value)} placeholder="S.C. Moldova Express S.R.L." />
                 </Field>
-                <Field label="CUI / CIF" hint="Romanian fiscal registration code">
+                <Field label="CUI / CIF" hint="Cod de înregistrare fiscală">
                   <DarkInput value={fiscalCode} onChange={(e) => setFiscalCode(e.target.value)} placeholder="RO18547290" />
                 </Field>
-                <Field label="Support phone">
+                <Field label="Telefon suport">
                   <DarkInput value={supportPhone} onChange={(e) => setSupportPhone(e.target.value)} placeholder="+40 21 555 0100" />
                 </Field>
-                <Field label="Support email" hint="Shown to passengers, not drivers">
+                <Field label="Email suport" hint="Afișat pasagerilor, nu șoferilor">
                   <DarkInput type="email" value={supportEmail} onChange={(e) => setSupportEmail(e.target.value)} placeholder="hello@carrier.ro" />
                 </Field>
               </div>
@@ -140,9 +140,9 @@ export default function OperatorSettingsPage() {
           </section>
 
           <section className="border border-border-dark p-5">
-            <h2 className="mb-4 text-[11px] font-bold uppercase tracking-wide text-ink-onDarkSecondary">Brand colors</h2>
+            <h2 className="mb-4 text-[11px] font-bold uppercase tracking-wide text-ink-onDarkSecondary">Culori de brand</h2>
             <div className="flex gap-6">
-              <Field label="Primary">
+              <Field label="Principală">
                 <div className="flex items-center gap-2">
                   <input
                     type="color"
@@ -153,7 +153,7 @@ export default function OperatorSettingsPage() {
                   <span className="font-mono text-xs text-ink-onDarkSecondary">{brandPrimary.toUpperCase()}</span>
                 </div>
               </Field>
-              <Field label="Secondary">
+              <Field label="Secundară">
                 <div className="flex items-center gap-2">
                   <input
                     type="color"
@@ -169,37 +169,37 @@ export default function OperatorSettingsPage() {
 
           <section className="border border-border-dark p-5">
             <div className="mb-1 flex items-center justify-between">
-              <h2 className="text-[11px] font-bold uppercase tracking-wide text-ink-onDarkSecondary">Driver emergency dispatch</h2>
+              <h2 className="text-[11px] font-bold uppercase tracking-wide text-ink-onDarkSecondary">Dispecerat de urgență pentru șoferi</h2>
               <button
                 type="button"
-                onClick={() => setContacts((prev) => [...prev, { name: "", phone: "", role: "Dispatcher" }])}
+                onClick={() => setContacts((prev) => [...prev, { name: "", phone: "", role: "Dispecer" }])}
                 className="flex items-center gap-1 text-[11px] font-semibold text-[#6FA6FF] hover:text-white"
               >
                 <Plus className="size-3" strokeWidth={2.5} />
-                Add contact
+                Adaugă contact
               </button>
             </div>
             <p className="mb-4 text-[11px] text-ink-onDarkSecondary/70">
-              Who a driver calls from the road — breakdowns, medical incidents, route disruptions. Not shown to passengers.
+              Pe cine sună un șofer de pe drum — defecțiuni, incidente medicale, perturbări de traseu. Nu este afișat pasagerilor.
             </p>
 
             {contacts.length === 0 && (
               <div className="flex items-center gap-2 border border-dashed border-border-dark px-3 py-4 text-xs text-ink-onDarkSecondary">
                 <AlertTriangle className="size-3.5 shrink-0 text-warning" strokeWidth={1.75} />
-                No dispatcher on file — drivers have no one to call in an emergency.
+                Niciun dispecer înregistrat — șoferii nu au pe cine suna în caz de urgență.
               </div>
             )}
 
             <div className="flex flex-col gap-2">
               {contacts.map((contact, i) => (
                 <div key={i} className="grid grid-cols-[1fr_1fr_120px_auto] items-center gap-2">
-                  <DarkInput placeholder="Name" value={contact.name} onChange={(e) => updateContact(i, { name: e.target.value })} />
+                  <DarkInput placeholder="Nume" value={contact.name} onChange={(e) => updateContact(i, { name: e.target.value })} />
                   <DarkInput
                     placeholder="+40 7XX XXX XXX"
                     value={contact.phone}
                     onChange={(e) => updateContact(i, { phone: e.target.value })}
                   />
-                  <DarkInput placeholder="Role" value={contact.role} onChange={(e) => updateContact(i, { role: e.target.value })} />
+                  <DarkInput placeholder="Rol" value={contact.role} onChange={(e) => updateContact(i, { role: e.target.value })} />
                   <button
                     type="button"
                     onClick={() => setContacts((prev) => prev.filter((_, idx) => idx !== i))}
@@ -215,16 +215,16 @@ export default function OperatorSettingsPage() {
           {mutation.isError && (
             <div className="flex items-center gap-2 border border-danger/30 bg-danger/[0.06] px-4 py-3 text-sm text-danger">
               <AlertTriangle className="size-4 shrink-0" strokeWidth={1.75} />
-              {mutation.error instanceof Error ? mutation.error.message : "Failed to save"}
+              {mutation.error instanceof Error ? mutation.error.message : "Salvarea a eșuat"}
             </div>
           )}
 
           <div className="flex items-center gap-3">
             <Button type="submit" variant="electric" disabled={mutation.isPending}>
               {mutation.isPending ? <Loader2 className="size-3.5 animate-spin" /> : <Check className="size-3.5" strokeWidth={2.5} />}
-              Save profile
+              Salvează profilul
             </Button>
-            {mutation.isSuccess && !mutation.isPending && <span className="text-xs text-emerald">Saved</span>}
+            {mutation.isSuccess && !mutation.isPending && <span className="text-xs text-emerald">Salvat</span>}
           </div>
         </form>
       )}

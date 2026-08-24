@@ -4,6 +4,13 @@ import Link from "next/link";
 import { ScanLine, ShieldCheck } from "lucide-react";
 import { useOperatorCompanies } from "@/hooks/use-operator";
 
+const STATUS_LABELS: Record<string, string> = {
+  pending: "în așteptare",
+  active: "activ",
+  suspended: "suspendat",
+  terminated: "încheiat",
+};
+
 export default function ConductorPickerPage() {
   const { data: companies, isLoading } = useOperatorCompanies();
 
@@ -14,8 +21,8 @@ export default function ConductorPickerPage() {
           <span className="flex size-12 items-center justify-center rounded-full bg-emerald/15 text-emerald">
             <ScanLine className="size-6" strokeWidth={2} />
           </span>
-          <h1 className="text-xl font-extrabold tracking-tight text-white">Conductor scanner</h1>
-          <p className="text-sm text-ink-onDarkSecondary">Choose your carrier to pick a trip.</p>
+          <h1 className="text-xl font-extrabold tracking-tight text-white">Scanner șofer</h1>
+          <p className="text-sm text-ink-onDarkSecondary">Alege operatorul pentru a selecta o cursă.</p>
         </div>
 
         <div className="flex flex-col gap-2">
@@ -38,7 +45,7 @@ export default function ConductorPickerPage() {
                   {company.name}
                   {company.isVerified && <ShieldCheck className="size-3.5 shrink-0 text-[#6FA6FF]" strokeWidth={2.25} />}
                 </div>
-                <div className="text-xs capitalize text-ink-onDarkSecondary">{company.status}</div>
+                <div className="text-xs capitalize text-ink-onDarkSecondary">{STATUS_LABELS[company.status] ?? company.status}</div>
               </div>
             </Link>
           ))}

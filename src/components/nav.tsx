@@ -1,36 +1,40 @@
 import Link from "next/link";
-import { Bus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
+/**
+ * The wordmark is deliberately just type, no icon glyph — "BUS" plus an X
+ * marked in emerald. The X is the story: it's the point where routes
+ * cross — the same seat, sold across crossing, non-overlapping segments,
+ * is the one idea this whole product is built around.
+ */
 export function Nav() {
   return (
     <header className="sticky top-0 z-40 border-b border-border-dark glass-dark">
       <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-6">
-        <Link href="/" className="flex items-center gap-2 text-ink-onDark">
-          <span className="flex size-7 items-center justify-center rounded-md bg-electric text-white">
-            <Bus className="size-4" strokeWidth={2.25} />
+        <Link href="/" className="flex items-center text-ink-onDark">
+          <span className="text-lg font-extrabold tracking-tight">
+            BUS<span className="text-emerald">X</span>
           </span>
-          <span className="text-sm font-bold tracking-tight">BUSX</span>
         </Link>
 
         <nav className="hidden items-center gap-6 text-sm font-medium text-ink-onDarkSecondary sm:flex">
           <Link href="/search" className="transition-colors hover:text-ink-onDark">
-            Search
+            Caută
           </Link>
           <Link href="#operators" className="transition-colors hover:text-ink-onDark">
-            For operators
+            Pentru operatori
           </Link>
           <Link href="#help" className="transition-colors hover:text-ink-onDark">
-            Help
+            Ajutor
           </Link>
         </nav>
 
         <div className="flex items-center gap-2">
           <Button variant="ghost-dark" size="sm">
-            Sign in
+            Autentificare
           </Button>
           <Button variant="electric" size="sm">
-            My tickets
+            Biletele mele
           </Button>
         </div>
       </div>

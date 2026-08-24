@@ -17,12 +17,12 @@ const mono = JetBrains_Mono({
 
 export const metadata: Metadata = {
   title: "BUSX",
-  description: "Next-generation passenger transport booking platform",
+  description: "Platformă de rezervare a călătoriilor interurbane cu autocarul, de nouă generație",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${jakarta.variable} ${mono.variable}`}>
+    <html lang="ro" className={`${jakarta.variable} ${mono.variable}`}>
       <body>
         <Providers>{children}</Providers>
       </body>

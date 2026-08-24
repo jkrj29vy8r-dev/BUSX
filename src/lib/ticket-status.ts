@@ -21,28 +21,28 @@ export function getTicketLiveStatus(params: {
   const { departureAtISO, ticketStatus, tripStatus, now = new Date() } = params;
 
   if (ticketStatus === "cancelled" || ticketStatus === "refunded" || tripStatus === "cancelled") {
-    return { label: "Cancelled", tone: "danger", pulsing: false };
+    return { label: "Anulat", tone: "danger", pulsing: false };
   }
   if (ticketStatus === "boarded") {
-    return { label: "Boarded", tone: "emerald", pulsing: false };
+    return { label: "Îmbarcat", tone: "emerald", pulsing: false };
   }
   if (tripStatus === "completed") {
-    return { label: "Completed", tone: "neutral", pulsing: false };
+    return { label: "Finalizat", tone: "neutral", pulsing: false };
   }
   if (ticketStatus === "checked_in") {
-    return { label: "Checked in — boarding", tone: "emerald", pulsing: true };
+    return { label: "Check-in făcut — se îmbarcă", tone: "emerald", pulsing: true };
   }
   if (tripStatus === "in_transit" || tripStatus === "departed") {
-    return { label: "En route", tone: "electric", pulsing: true };
+    return { label: "În cursă", tone: "electric", pulsing: true };
   }
 
   const minutesToDeparture = (new Date(departureAtISO).getTime() - now.getTime()) / 60_000;
 
   if (minutesToDeparture <= 0) {
-    return { label: "Departing now", tone: "emerald", pulsing: true };
+    return { label: "Plecare acum", tone: "emerald", pulsing: true };
   }
   if (minutesToDeparture <= BOARDING_WINDOW_MINUTES) {
-    return { label: `Boarding in ${Math.ceil(minutesToDeparture)} min`, tone: "emerald", pulsing: true };
+    return { label: `Îmbarcare în ${Math.ceil(minutesToDeparture)} min`, tone: "emerald", pulsing: true };
   }
-  return { label: "Upcoming", tone: "neutral", pulsing: false };
+  return { label: "Programat", tone: "neutral", pulsing: false };
 }

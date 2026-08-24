@@ -16,13 +16,13 @@ export default function OperatorFleetPage() {
     <main className="flex-1 px-8 py-8">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-lg font-bold tracking-tight text-white">Fleet</h1>
-          <p className="mt-1 text-[13px] text-ink-onDarkSecondary">Every vehicle and the seat layout it boards passengers with.</p>
+          <h1 className="text-lg font-bold tracking-tight text-white">Flotă</h1>
+          <p className="mt-1 text-[13px] text-ink-onDarkSecondary">Fiecare vehicul și planul de locuri cu care îmbarcă pasagerii.</p>
         </div>
         <Button variant="electric" asChild size="sm">
           <Link href={`/operator/${companySlug}/fleet/new`}>
             <Plus className="size-3.5" strokeWidth={2.5} />
-            Build a vehicle
+            Construiește un vehicul
           </Link>
         </Button>
       </div>
@@ -32,9 +32,9 @@ export default function OperatorFleetPage() {
       {fleet?.length === 0 && (
         <div className="mt-8 flex flex-col items-center gap-3 border border-border-dark py-16 text-center">
           <Truck className="size-8 text-ink-onDarkSecondary" strokeWidth={1.25} />
-          <div className="text-md font-medium text-white">No vehicles yet</div>
+          <div className="text-md font-medium text-white">Niciun vehicul încă</div>
           <Button variant="electric" asChild size="sm" className="mt-2">
-            <Link href={`/operator/${companySlug}/fleet/new`}>Build your first vehicle</Link>
+            <Link href={`/operator/${companySlug}/fleet/new`}>Construiește primul tău vehicul</Link>
           </Button>
         </div>
       )}
@@ -49,13 +49,13 @@ export default function OperatorFleetPage() {
             >
               <div className="flex items-center justify-between">
                 <span className="font-mono text-sm font-bold text-white">{vehicle.registrationPlate}</span>
-                {!vehicle.isActive && <Badge variant="on-dark">Inactive</Badge>}
+                {!vehicle.isActive && <Badge variant="on-dark">Inactiv</Badge>}
               </div>
               <div className="mt-2 text-xs text-ink-onDarkSecondary">{VEHICLE_TYPE_LABELS[vehicle.vehicleType]}</div>
               <div className="mt-3 flex items-center gap-4 text-xs text-ink-onDarkSecondary">
-                <span className="font-mono text-white">{vehicle.totalSeats}</span> seats
+                <span className="font-mono text-white">{vehicle.totalSeats}</span> locuri
                 <span>
-                  <span className="font-mono text-white">{vehicle.upcomingTripCount}</span> upcoming trips
+                  <span className="font-mono text-white">{vehicle.upcomingTripCount}</span> curse programate
                 </span>
               </div>
             </Link>

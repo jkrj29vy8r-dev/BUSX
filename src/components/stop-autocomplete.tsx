@@ -47,7 +47,7 @@ export function StopAutocomplete({ label, placeholder, value, onChange, classNam
             setQuery("");
             setOpen(true);
           }}
-          placeholder={placeholder ?? "City or station"}
+          placeholder={placeholder ?? "Oraș sau stație"}
           className="h-14 w-full rounded-md border border-border bg-white pl-10 pr-3 text-md font-medium text-ink placeholder:font-normal placeholder:text-ink-tertiary transition-colors duration-150 hover:border-border-hover focus:border-electric focus:outline-none focus:ring-2 focus:ring-electric-muted"
         />
       </div>
@@ -61,9 +61,9 @@ export function StopAutocomplete({ label, placeholder, value, onChange, classNam
             transition={{ duration: 0.14, ease: [0.16, 1, 0.3, 1] }}
             className="absolute left-0 right-0 top-full z-30 mt-1.5 max-h-72 overflow-y-auto rounded-lg border border-border bg-white shadow-panel"
           >
-            {isFetching && <div className="px-3.5 py-3 text-sm text-ink-tertiary">Searching…</div>}
+            {isFetching && <div className="px-3.5 py-3 text-sm text-ink-tertiary">Se caută…</div>}
             {!isFetching && results?.length === 0 && (
-              <div className="px-3.5 py-3 text-sm text-ink-tertiary">No stations match &ldquo;{query}&rdquo;</div>
+              <div className="px-3.5 py-3 text-sm text-ink-tertiary">Nicio stație nu corespunde cu &ldquo;{query}&rdquo;</div>
             )}
             {results?.map((stop) => (
               <button

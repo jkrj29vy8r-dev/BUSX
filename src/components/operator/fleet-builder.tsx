@@ -18,17 +18,18 @@ import {
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/cn";
 import { useSaveOperatorVehicle } from "@/hooks/use-operator";
+import { VEHICLE_TYPE_LABELS } from "@/lib/vehicle-labels";
 import type { OperatorVehicleDetail, SeatLayout, SeatTypeEnum, VehicleId, VehicleTypeEnum } from "@/types/database";
 
 type CellTool = "empty" | "standard" | "premium" | "driver" | "door" | "toilet";
 
 const TOOLS: Array<{ id: CellTool; label: string; icon: typeof Armchair; swatch: string }> = [
-  { id: "standard", label: "Standard seat", icon: Armchair, swatch: "border-white/25 bg-white/[0.06] text-white" },
-  { id: "premium", label: "VIP seat", icon: Sparkles, swatch: "border-gold bg-gold/10 text-gold" },
-  { id: "driver", label: "Driver", icon: SquareUser, swatch: "border-[#6FA6FF] bg-electric/10 text-[#6FA6FF]" },
-  { id: "door", label: "Door", icon: DoorOpen, swatch: "border-emerald bg-emerald/10 text-emerald" },
-  { id: "toilet", label: "Toilet", icon: Bath, swatch: "border-white/25 bg-white/[0.06] text-ink-onDarkSecondary" },
-  { id: "empty", label: "Eraser", icon: Eraser, swatch: "border-dashed border-white/20 bg-transparent text-ink-onDarkSecondary" },
+  { id: "standard", label: "Loc standard", icon: Armchair, swatch: "border-white/25 bg-white/[0.06] text-white" },
+  { id: "premium", label: "Loc VIP", icon: Sparkles, swatch: "border-gold bg-gold/10 text-gold" },
+  { id: "driver", label: "Șofer", icon: SquareUser, swatch: "border-[#6FA6FF] bg-electric/10 text-[#6FA6FF]" },
+  { id: "door", label: "Ușă", icon: DoorOpen, swatch: "border-emerald bg-emerald/10 text-emerald" },
+  { id: "toilet", label: "Toaletă", icon: Bath, swatch: "border-white/25 bg-white/[0.06] text-ink-onDarkSecondary" },
+  { id: "empty", label: "Radieră", icon: Eraser, swatch: "border-dashed border-white/20 bg-transparent text-ink-onDarkSecondary" },
 ];
 
 const VEHICLE_TYPES: VehicleTypeEnum[] = ["minibus_16", "sprinter_19", "isuzu_30", "coach_50", "double_decker_70", "custom"];
@@ -164,7 +165,7 @@ export function FleetBuilder({ companySlug, vehicle }: FleetBuilderProps) {
     <div className="flex flex-col gap-6">
       <div className="grid grid-cols-1 gap-4 border border-border-dark p-5 sm:grid-cols-3">
         <label className="flex flex-col gap-1.5">
-          <span className="text-[11px] font-semibold uppercase tracking-wide text-ink-onDarkSecondary">Registration plate</span>
+          <span className="text-[11px] font-semibold uppercase tracking-wide text-ink-onDarkSecondary">Număr de înmatriculare</span>
           <input
             value={registrationPlate}
             onChange={(e) => setRegistrationPlate(e.target.value.toUpperCase())}
@@ -173,7 +174,7 @@ export function FleetBuilder({ companySlug, vehicle }: FleetBuilderProps) {
           />
         </label>
         <label className="flex flex-col gap-1.5">
-          <span className="text-[11px] font-semibold uppercase tracking-wide text-ink-onDarkSecondary">Vehicle class</span>
+          <span className="text-[11px] font-semibold uppercase tracking-wide text-ink-onDarkSecondary">Clasa vehiculului</span>
           <select
             value={vehicleType}
             onChange={(e) => setVehicleType(e.target.value as VehicleTypeEnum)}
@@ -181,22 +182,22 @@ export function FleetBuilder({ companySlug, vehicle }: FleetBuilderProps) {
           >
             {VEHICLE_TYPES.map((t) => (
               <option key={t} value={t} className="bg-surface-dark">
-                {t.replace(/_/g, " ")}
+                {VEHICLE_TYPE_LABELS[t]}
               </option>
             ))}
           </select>
         </label>
         <div className="flex flex-col gap-1.5">
-          <span className="text-[11px] font-semibold uppercase tracking-wide text-ink-onDarkSecondary">Seats placed</span>
-          <div className="flex h-9 items-center font-mono text-sm text-white">{seatCount} bookable</div>
+          <span className="text-[11px] font-semibold uppercase tracking-wide text-ink-onDarkSecondary">Locuri plasate</span>
+          <div className="flex h-9 items-center font-mono text-sm text-white">{seatCount} rezervabile</div>
         </div>
       </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[220px_1fr]">
         <div className="flex flex-col gap-4">
           <div className="border border-border-dark p-4">
-            <h3 className="mb-3 text-[11px] font-bold uppercase tracking-wide text-ink-onDarkSecondary">Palette</h3>
-            <p className="mb-3 text-[11px] text-ink-onDarkSecondary/70">Drag onto the grid, or click a tool then click cells to paint.</p>
+            <h3 className="mb-3 text-[11px] font-bold uppercase tracking-wide text-ink-onDarkSecondary">Paletă</h3>
+            <p className="mb-3 text-[11px] text-ink-onDarkSecondary/70">Trage pe grilă, sau selectează un instrument și apoi apasă pe celule pentru a picta.</p>
             <div className="flex flex-col gap-1.5">
               {TOOLS.map((tool) => {
                 const Icon = tool.icon;
@@ -223,18 +224,18 @@ export function FleetBuilder({ companySlug, vehicle }: FleetBuilderProps) {
           </div>
 
           <div className="border border-border-dark p-4">
-            <h3 className="mb-3 text-[11px] font-bold uppercase tracking-wide text-ink-onDarkSecondary">Grid</h3>
+            <h3 className="mb-3 text-[11px] font-bold uppercase tracking-wide text-ink-onDarkSecondary">Grilă</h3>
             <div className="flex flex-col gap-3 text-xs text-ink-onDarkSecondary">
-              <DimensionStepper label="Rows" value={rows} onChange={(v) => resize(v, cols)} min={1} max={20} />
-              <DimensionStepper label="Columns" value={cols} onChange={(v) => resize(rows, v)} min={1} max={8} />
-              <DimensionStepper label="Aisle after col" value={aisleAfterCol} onChange={setAisleAfterCol} min={0} max={cols - 1} />
+              <DimensionStepper label="Rânduri" value={rows} onChange={(v) => resize(v, cols)} min={1} max={20} />
+              <DimensionStepper label="Coloane" value={cols} onChange={(v) => resize(rows, v)} min={1} max={8} />
+              <DimensionStepper label="Culoar după coloana" value={aisleAfterCol} onChange={setAisleAfterCol} min={0} max={cols - 1} />
             </div>
           </div>
 
           {!hasDriver && (
             <div className="flex items-center gap-2 border border-warning/30 bg-warning/[0.06] px-3 py-2.5 text-[11px] text-warning">
               <AlertTriangle className="size-3.5 shrink-0" strokeWidth={1.75} />
-              No driver seat placed yet.
+              Niciun loc de șofer plasat încă.
             </div>
           )}
         </div>
@@ -263,7 +264,7 @@ export function FleetBuilder({ companySlug, vehicle }: FleetBuilderProps) {
                           isAisle && "mr-4",
                           tool === "empty" ? "border-dashed border-white/10 bg-transparent hover:border-white/30" : cn("border", toolMeta.swatch)
                         )}
-                        title={`Row ${r + 1}, Col ${c + 1} · ${toolMeta.label}`}
+                        title={`Rândul ${r + 1}, coloana ${c + 1} · ${toolMeta.label}`}
                       >
                         {tool !== "empty" && <Icon className="size-3.5" strokeWidth={1.75} />}
                       </button>
@@ -278,7 +279,7 @@ export function FleetBuilder({ companySlug, vehicle }: FleetBuilderProps) {
                     fullWidthRows.has(r) ? "bg-electric/20 text-[#6FA6FF]" : "text-ink-onDarkSecondary/50 hover:text-ink-onDarkSecondary"
                   )}
                 >
-                  {fullWidthRows.has(r) ? "Back bench" : "+ back bench"}
+                  {fullWidthRows.has(r) ? "Banchetă spate" : "+ banchetă spate"}
                 </button>
               </div>
             ))}
@@ -289,7 +290,7 @@ export function FleetBuilder({ companySlug, vehicle }: FleetBuilderProps) {
       {mutation.isError && (
         <div className="flex items-center gap-2 border border-danger/30 bg-danger/[0.06] px-4 py-3 text-sm text-danger">
           <AlertTriangle className="size-4 shrink-0" strokeWidth={1.75} />
-          {mutation.error instanceof Error ? mutation.error.message : "Failed to save layout"}
+          {mutation.error instanceof Error ? mutation.error.message : "Salvarea planului de locuri a eșuat"}
         </div>
       )}
 
@@ -300,7 +301,7 @@ export function FleetBuilder({ companySlug, vehicle }: FleetBuilderProps) {
           disabled={mutation.isPending || seatCount === 0 || !registrationPlate.trim()}
         >
           {mutation.isPending ? <Loader2 className="size-3.5 animate-spin" /> : <Check className="size-3.5" strokeWidth={2.5} />}
-          Save vehicle
+          Salvează vehiculul
         </Button>
       </div>
     </div>

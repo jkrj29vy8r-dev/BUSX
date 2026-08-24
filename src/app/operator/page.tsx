@@ -1,8 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { Bus, ShieldCheck } from "lucide-react";
+import { ShieldCheck } from "lucide-react";
 import { useOperatorCompanies } from "@/hooks/use-operator";
+
+const STATUS_LABELS: Record<string, string> = {
+  pending: "în așteptare",
+  active: "activ",
+  suspended: "suspendat",
+  terminated: "încheiat",
+};
 
 /**
  * Stand-in for a login redirect: this environment has no live Supabase Auth
@@ -20,11 +27,11 @@ export default function OperatorPickerPage() {
     <div className="flex min-h-screen items-center justify-center bg-canvas px-6">
       <div className="w-full max-w-md">
         <div className="mb-8 flex flex-col items-center gap-3 text-center">
-          <span className="flex size-11 items-center justify-center rounded-lg bg-electric text-white">
-            <Bus className="size-5" strokeWidth={2.25} />
+          <span className="text-2xl font-extrabold tracking-tight text-ink">
+            BUS<span className="text-emerald">X</span>
           </span>
-          <h1 className="text-xl font-extrabold tracking-tight text-ink">Operator dashboard</h1>
-          <p className="text-sm text-ink-secondary">Choose your carrier to continue.</p>
+          <h1 className="text-xl font-extrabold tracking-tight text-ink">Panou operator</h1>
+          <p className="text-sm text-ink-secondary">Alege operatorul pentru a continua.</p>
         </div>
 
         <div className="flex flex-col gap-2">
@@ -48,7 +55,7 @@ export default function OperatorPickerPage() {
                   {company.name}
                   {company.isVerified && <ShieldCheck className="size-3.5 shrink-0 text-electric" strokeWidth={2.25} />}
                 </div>
-                <div className="text-xs capitalize text-ink-tertiary">{company.status}</div>
+                <div className="text-xs capitalize text-ink-tertiary">{STATUS_LABELS[company.status] ?? company.status}</div>
               </div>
             </Link>
           ))}

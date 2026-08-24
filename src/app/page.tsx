@@ -13,14 +13,14 @@ export default function HomePage() {
         <div className="mb-8 flex flex-col gap-3">
           <Badge variant="electric" className="w-fit">
             <Radio className="size-3" strokeWidth={2.25} />
-            Live seat inventory across every operator
+            Locuri disponibile în timp real, la toți operatorii
           </Badge>
           <h1 className="max-w-xl text-3xl font-extrabold tracking-tight text-ink sm:text-4xl">
-            Intercity travel, booked in seconds.
+            Călătorii interurbane, rezervate în câteva secunde.
           </h1>
           <p className="max-w-lg text-md text-ink-secondary">
-            Search every stop on the route — not just the endpoints — and pay
-            only for the segment you ride.
+            Caută orice stație de pe traseu — nu doar capetele de linie — și
+            plătești doar segmentul pe care îl parcurgi.
           </p>
         </div>
 
@@ -33,11 +33,11 @@ export default function HomePage() {
             <div className="mb-1 flex size-9 items-center justify-center rounded-md bg-electric-muted text-electric">
               <Layers className="size-4.5" strokeWidth={1.75} />
             </div>
-            <h3 className="mt-3 text-md font-bold text-ink">Seat 12 can be sold twice</h3>
+            <h3 className="mt-3 text-md font-bold text-ink">Locul 12 poate fi vândut de două ori</h3>
             <p className="mt-1 text-sm text-ink-secondary">
-              Once for Piatra Neamț → Roman, and again for Otopeni → București
-              — same trip, same seat, non-overlapping segments. No blocked
-              inventory.
+              O dată pentru Piatra Neamț → Roman, și încă o dată pentru
+              Otopeni → București — aceeași cursă, același loc, segmente care
+              nu se suprapun. Fără locuri blocate degeaba.
             </p>
           </BentoTile>
 
@@ -45,10 +45,10 @@ export default function HomePage() {
             <div className="mb-1 flex size-9 items-center justify-center rounded-md bg-emerald-muted text-emerald-hover">
               <ShieldCheck className="size-4.5" strokeWidth={1.75} />
             </div>
-            <h3 className="mt-3 text-md font-bold text-ink">Verified carriers only</h3>
+            <h3 className="mt-3 text-md font-bold text-ink">Doar operatori verificați</h3>
             <p className="mt-1 text-sm text-ink-secondary">
-              Every operator is identity-checked before their routes go live.
-              Look for the verified badge at checkout.
+              Fiecare operator este verificat înainte ca rutele lui să fie
+              publicate. Caută insigna de verificare la finalizarea comenzii.
             </p>
           </BentoTile>
 
@@ -56,10 +56,11 @@ export default function HomePage() {
             <div className="mb-1 flex size-9 items-center justify-center rounded-md bg-ink/[0.06] text-ink">
               <GitBranch className="size-4.5" strokeWidth={1.75} />
             </div>
-            <h3 className="mt-3 text-md font-bold text-ink">N-stop route graphs</h3>
+            <h3 className="mt-3 text-md font-bold text-ink">Trasee cu N stații</h3>
             <p className="mt-1 text-sm text-ink-secondary">
-              Routes aren&apos;t A→B. Search any stop pair on a multi-city line and
-              get priced for exactly that leg.
+              Rutele nu sunt doar A→B. Caută orice pereche de stații de pe o
+              linie cu mai multe orașe și primești prețul exact pentru acel
+              segment.
             </p>
           </BentoTile>
 
@@ -67,10 +68,10 @@ export default function HomePage() {
             <div className="mb-1 flex size-9 items-center justify-center rounded-md bg-ink/[0.06] text-ink">
               <QrCode className="size-4.5" strokeWidth={1.75} />
             </div>
-            <h3 className="mt-3 text-md font-bold text-ink">Boards without signal</h3>
+            <h3 className="mt-3 text-md font-bold text-ink">Urcare fără semnal</h3>
             <p className="mt-1 text-sm text-ink-secondary">
-              Every ticket QR is cryptographically signed. Conductors verify it
-              offline — no connectivity required at the door.
+              Fiecare cod QR de bilet este semnat criptografic. Șoferii îl
+              verifică offline — nu e nevoie de conexiune la ușă.
             </p>
           </BentoTile>
 
@@ -78,10 +79,11 @@ export default function HomePage() {
             <div className="mb-1 flex size-9 items-center justify-center rounded-md bg-ink/[0.06] text-ink">
               <Radio className="size-4.5" strokeWidth={1.75} />
             </div>
-            <h3 className="mt-3 text-md font-bold text-ink">Live seat map</h3>
+            <h3 className="mt-3 text-md font-bold text-ink">Hartă locuri în timp real</h3>
             <p className="mt-1 text-sm text-ink-secondary">
-              Seats grey out the instant another passenger holds them.
-              Ten-minute checkout window, no overbooking.
+              Locurile se blochează instant când alt pasager le rezervă.
+              Fereastră de 10 minute la finalizarea comenzii, fără
+              suprarezervări.
             </p>
           </BentoTile>
         </div>

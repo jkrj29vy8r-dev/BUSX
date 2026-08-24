@@ -64,7 +64,7 @@ export function TripCard({ result, passengers }: TripCardProps) {
             </span>
             <span className={lowSeats ? "flex items-center gap-1 font-medium text-warning" : "flex items-center gap-1"}>
               <Users className="size-3.5" strokeWidth={1.75} />
-              {availableSeatsCount} left
+              {availableSeatsCount} libere
             </span>
             <button
               type="button"
@@ -75,7 +75,7 @@ export function TripCard({ result, passengers }: TripCardProps) {
               className="flex items-center gap-1 font-medium text-electric transition-colors hover:text-electric-hover"
             >
               <ListTree className="size-3.5" strokeWidth={1.75} />
-              Itinerary
+              Traseu
             </button>
           </div>
           <div className="flex items-center gap-3">
@@ -92,7 +92,7 @@ export function TripCard({ result, passengers }: TripCardProps) {
                 router.push(href);
               }}
             >
-              Select
+              Alege
             </Button>
           </div>
         </div>

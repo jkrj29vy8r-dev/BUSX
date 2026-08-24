@@ -33,7 +33,7 @@ export function RouteItineraryDrawer({
   const highlightIndex = tripDetail?.stops.findIndex((s) => s.routeStopId === destinationRouteStopId);
 
   return (
-    <Drawer open={open} onOpenChange={onOpenChange} title="Route itinerary" subtitle={companyName}>
+    <Drawer open={open} onOpenChange={onOpenChange} title="Traseul cursei" subtitle={companyName}>
       {isLoading && (
         <div className="flex h-64 items-center justify-center text-ink-tertiary">
           <Loader2 className="size-5 animate-spin" />
@@ -51,10 +51,10 @@ export function RouteItineraryDrawer({
           <div>
             <div className="mb-4 flex items-center justify-between border-b border-border pb-3">
               <div>
-                <div className="text-xs font-semibold uppercase tracking-wide text-ink-tertiary">Full route</div>
+                <div className="text-xs font-semibold uppercase tracking-wide text-ink-tertiary">Traseu complet</div>
                 <div className="text-sm font-medium text-ink">{tripDetail.route.name}</div>
               </div>
-              <div className="text-right text-xs text-ink-tertiary">{tripDetail.stops.length} stations</div>
+              <div className="text-right text-xs text-ink-tertiary">{tripDetail.stops.length} stații</div>
             </div>
 
             <MetroTimeline

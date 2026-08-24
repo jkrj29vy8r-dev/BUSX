@@ -15,7 +15,7 @@ export default function ConductorScanPage() {
         type="button"
         onClick={() => router.push(`/conductor/${companySlug}`)}
         className="absolute left-4 top-4 flex size-9 items-center justify-center rounded-full bg-black/60 text-white"
-        aria-label="Back to trip picker"
+        aria-label="Înapoi la selecția cursei"
       >
         <ChevronLeft className="size-5" strokeWidth={2} />
       </button>

@@ -22,7 +22,7 @@ export function RouteSwapButton({ onSwap, className }: RouteSwapButtonProps) {
         setSpins((n) => n + 1);
         onSwap();
       }}
-      aria-label="Swap origin and destination"
+      aria-label="Inversează originea și destinația"
       whileTap={{ scale: 0.9 }}
       whileHover={{ scale: 1.05 }}
       className={cn(

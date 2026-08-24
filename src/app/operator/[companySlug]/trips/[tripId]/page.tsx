@@ -36,7 +36,7 @@ export default function OperatorTripManifestPage() {
         className="mb-4 flex w-fit items-center gap-1 text-xs font-semibold text-ink-onDarkSecondary transition-colors hover:text-white"
       >
         <ChevronLeft className="size-3.5" strokeWidth={2.25} />
-        All trips
+        Toate cursele
       </Link>
 
       {isLoading && <div className="h-96 animate-pulse border border-border-dark bg-surface-dark" />}
@@ -58,13 +58,13 @@ export default function OperatorTripManifestPage() {
                 {boardedCount}
                 <span className="text-sm font-normal text-ink-onDarkSecondary">/{data.passengers.length}</span>
               </div>
-              <div className="text-[11px] text-ink-onDarkSecondary">checked in</div>
+              <div className="text-[11px] text-ink-onDarkSecondary">check-in făcut</div>
             </div>
           </div>
 
           <div className="mt-6 flex flex-wrap items-center gap-2">
             <FilterChip active={stationFilter === "all"} onClick={() => setStationFilter("all")}>
-              All boarding stations
+              Toate stațiile de îmbarcare
             </FilterChip>
             {data.boardingStops.map((stop) => (
               <FilterChip key={stop.routeStopId} active={stationFilter === stop.routeStopId} onClick={() => setStationFilter(stop.routeStopId)}>
@@ -75,7 +75,7 @@ export default function OperatorTripManifestPage() {
           </div>
 
           <div className="mt-4 overflow-hidden border border-border-dark">
-            {filtered.length === 0 && <div className="p-10 text-center text-sm text-ink-onDarkSecondary">No passengers match this filter.</div>}
+            {filtered.length === 0 && <div className="p-10 text-center text-sm text-ink-onDarkSecondary">Niciun pasager nu corespunde acestui filtru.</div>}
             {filtered.map((passenger, i) => {
               const isCheckedIn = BOARDABLE.has(passenger.status);
               const isTogglable = ["paid", "reserved", "checked_in"].includes(passenger.status);
@@ -127,10 +127,10 @@ export default function OperatorTripManifestPage() {
                       ) : isCheckedIn ? (
                         <>
                           <ShieldCheck className="size-3" strokeWidth={2.5} />
-                          Boarded
+                          Îmbarcat
                         </>
                       ) : (
-                        "Check in"
+                        "Check-in"
                       )}
                     </button>
                   </div>
