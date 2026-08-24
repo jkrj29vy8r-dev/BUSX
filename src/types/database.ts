@@ -58,6 +58,12 @@ export type FareClass = "standard" | "premium" | "student" | "senior";
 // Row types (1:1 with DB tables)
 // ----------------------------------------------------------------------------
 
+export interface EmergencyContact {
+  name: string;
+  phone: string;
+  role: string;
+}
+
 export interface CompanyRow {
   id: CompanyId;
   name: string;
@@ -73,6 +79,7 @@ export interface CompanyRow {
   status: CompanyStatus;
   is_verified: boolean;
   verified_at: ISODateTime | null;
+  emergency_contacts: EmergencyContact[];
   created_at: ISODateTime;
   updated_at: ISODateTime;
 }
@@ -155,6 +162,11 @@ export interface SeatLayout {
    * gutter after `aisleAfterCol`, not a seat column, so this can't be
    * inferred from seat presence; it has to be declared explicitly. */
   fullWidthRows?: number[];
+  /** Non-bookable landmark cells — door and toilet placements from the Fleet
+   * Builder. Driver placements are a real `seats` row instead (seat_type
+   * already models "driver"); doors/toilets have no seat identity at all,
+   * so they live here rather than inventing seat rows nothing ever sells. */
+  layoutMarkers?: Array<{ row: number; col: number; kind: "door" | "toilet" }>;
   layoutVersion: number;
 }
 
@@ -362,6 +374,25 @@ export type TicketVerificationResult =
   | { valid: true; payload: TicketQrPayloadV1 }
   | { valid: false; reason: "bad_signature" | "malformed" | "unknown_key_version" };
 
+/** What the conductor's scanner actually needs: cryptographic validity PLUS
+ * "is this the right bus" and "is this ticket even still active" — a
+ * technically well-signed ticket for tomorrow's trip, or a cancelled one,
+ * must still flash red at today's door. */
+export type BoardingScanResult =
+  | {
+      valid: true;
+      alreadyCheckedIn: boolean;
+      ticket: {
+        ticketNumber: string;
+        seatNumber: string;
+        passengerName: string;
+        originCity: string;
+        destinationCity: string;
+        fareClass: FareClass;
+      };
+    }
+  | { valid: false; reason: "bad_signature" | "malformed" | "unknown_key_version" | "wrong_trip" | "not_found" | "not_boardable" };
+
 export interface CreateBookingInput {
   contactEmail: string;
   contactPhone?: string;
@@ -541,6 +572,91 @@ export interface OperatorTripSummary {
   totalSeats: number;
   revenue: number;
   currency: CurrencyCode;
+}
+
+// -- Carrier profile (onboarding / settings) --------------------------------
+
+export interface OperatorCompanyProfile {
+  id: CompanyId;
+  name: string;
+  slug: string;
+  legalName: string | null;
+  fiscalCode: string | null;
+  supportPhone: string | null;
+  supportEmail: string | null;
+  logoUrl: string | null;
+  brandPrimaryColor: HexColor;
+  brandSecondaryColor: HexColor;
+  emergencyContacts: EmergencyContact[];
+  status: CompanyStatus;
+  isVerified: boolean;
+}
+
+export interface UpdateCompanyProfileInput {
+  legalName?: string | null;
+  fiscalCode?: string | null;
+  supportPhone?: string | null;
+  supportEmail?: string | null;
+  logoUrl?: string | null;
+  brandPrimaryColor?: HexColor;
+  brandSecondaryColor?: HexColor;
+  emergencyContacts?: EmergencyContact[];
+}
+
+// -- Fleet builder -----------------------------------------------------------
+
+export interface OperatorFleetVehicleSummary {
+  id: VehicleId;
+  registrationPlate: string;
+  vehicleType: VehicleTypeEnum;
+  totalSeats: number;
+  isActive: boolean;
+  upcomingTripCount: number;
+}
+
+export interface OperatorVehicleDetail {
+  id: VehicleId | null;
+  registrationPlate: string;
+  vehicleType: VehicleTypeEnum;
+  seatLayout: SeatLayout;
+  seats: Array<{ seatNumber: string; rowNumber: number; colPosition: number; deck: number; seatType: SeatTypeEnum }>;
+}
+
+export interface SaveFleetVehicleInput {
+  vehicleId: VehicleId | null; // null = create
+  registrationPlate: string;
+  vehicleType: VehicleTypeEnum;
+  seatLayout: SeatLayout;
+  seats: Array<{ seatNumber: string; rowNumber: number; colPosition: number; deck: number; seatType: SeatTypeEnum }>;
+}
+
+// -- Trip control & passenger manifest ---------------------------------------
+
+export interface OperatorManifestEntry {
+  ticketId: TicketId;
+  ticketNumber: string;
+  passengerName: string;
+  passengerPhone: string | null;
+  seatNumber: string;
+  originCity: string;
+  destinationCity: string;
+  fareClass: FareClass;
+  priceAmount: number;
+  currency: CurrencyCode;
+  status: TicketStatus;
+}
+
+export interface OperatorTripManifest {
+  trip: {
+    id: TripId;
+    routeName: string;
+    departureAt: ISODateTime;
+    status: TripStatus;
+    vehicleType: VehicleTypeEnum;
+    registrationPlate: string;
+  };
+  boardingStops: Array<{ routeStopId: RouteStopId; city: string; orderIndex: number }>;
+  passengers: OperatorManifestEntry[];
 }
 
 // ----------------------------------------------------------------------------

@@ -50,20 +50,20 @@ export function PricingMatrixEditor({ companySlug, routeId, stops, cells }: Pric
   }
 
   return (
-    <div className="overflow-x-auto rounded-lg border border-border bg-white shadow-subtle">
+    <div className="overflow-x-auto border border-border-dark">
       <table className="w-full border-collapse text-sm">
         <thead>
           <tr>
-            <th className="sticky left-0 z-10 border-b border-r border-border bg-surface-inset px-3 py-2.5 text-left text-[11px] font-bold uppercase tracking-wide text-ink-tertiary">
+            <th className="sticky left-0 z-10 border-b border-r border-border-dark bg-surface-dark-raised px-3 py-2.5 text-left text-[10px] font-bold uppercase tracking-wide text-ink-onDarkSecondary">
               Origin \ Destination
             </th>
             {sorted.map((dest) => (
               <th
                 key={dest.routeStopId}
-                className="border-b border-border px-3 py-2.5 text-left text-xs font-semibold text-ink"
+                className="border-b border-border-dark px-3 py-2.5 text-left text-xs font-semibold text-white"
               >
                 {dest.city}
-                <div className="font-normal text-ink-tertiary">{dest.name}</div>
+                <div className="font-normal text-ink-onDarkSecondary">{dest.name}</div>
               </th>
             ))}
           </tr>
@@ -71,16 +71,16 @@ export function PricingMatrixEditor({ companySlug, routeId, stops, cells }: Pric
         <tbody>
           {sorted.map((origin) => (
             <tr key={origin.routeStopId}>
-              <th className="sticky left-0 z-10 border-b border-r border-border bg-surface-inset px-3 py-2.5 text-left text-xs font-semibold text-ink">
+              <th className="sticky left-0 z-10 border-b border-r border-border-dark bg-surface-dark-raised px-3 py-2.5 text-left text-xs font-semibold text-white">
                 {origin.city}
-                <div className="font-normal text-ink-tertiary">{origin.name}</div>
+                <div className="font-normal text-ink-onDarkSecondary">{origin.name}</div>
               </th>
               {sorted.map((destination) => {
                 if (destination.orderIndex <= origin.orderIndex) {
                   return (
                     <td
                       key={destination.routeStopId}
-                      className="border-b border-border bg-[repeating-linear-gradient(135deg,rgba(11,15,23,0.03)_0px,rgba(11,15,23,0.03)_4px,transparent_4px,transparent_9px)] px-3 py-2.5"
+                      className="border-b border-border-dark bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.025)_0px,rgba(255,255,255,0.025)_4px,transparent_4px,transparent_9px)] px-3 py-2.5"
                     />
                   );
                 }
@@ -96,7 +96,7 @@ export function PricingMatrixEditor({ companySlug, routeId, stops, cells }: Pric
                 const isSaving = mutation.isPending && mutation.variables?.originRouteStopId === origin.routeStopId && mutation.variables?.destinationRouteStopId === destination.routeStopId;
 
                 return (
-                  <td key={destination.routeStopId} className="border-b border-border px-2 py-1.5">
+                  <td key={destination.routeStopId} className="border-b border-border-dark px-2 py-1.5">
                     {isEditing ? (
                       <div className="flex items-center gap-1">
                         <input
@@ -109,12 +109,12 @@ export function PricingMatrixEditor({ companySlug, routeId, stops, cells }: Pric
                             if (e.key === "Enter") commit(cell);
                             if (e.key === "Escape") setEditingKey(null);
                           }}
-                          className="h-8 w-20 rounded border border-electric bg-white px-2 text-sm tabular-nums text-ink outline-none ring-2 ring-electric-muted"
+                          className="h-8 w-20 rounded border border-electric bg-surface-dark px-2 text-sm tabular-nums text-white outline-none ring-2 ring-electric/25"
                         />
-                        <button onClick={() => commit(cell)} className="flex size-6 items-center justify-center rounded text-emerald-hover hover:bg-emerald-muted">
+                        <button onClick={() => commit(cell)} className="flex size-6 items-center justify-center rounded text-emerald hover:bg-emerald/10">
                           <Check className="size-3.5" strokeWidth={2.5} />
                         </button>
-                        <button onClick={() => setEditingKey(null)} className="flex size-6 items-center justify-center rounded text-ink-tertiary hover:bg-ink/[0.06]">
+                        <button onClick={() => setEditingKey(null)} className="flex size-6 items-center justify-center rounded text-ink-onDarkSecondary hover:bg-white/[0.06]">
                           <X className="size-3.5" strokeWidth={2.5} />
                         </button>
                       </div>
@@ -124,7 +124,7 @@ export function PricingMatrixEditor({ companySlug, routeId, stops, cells }: Pric
                         onClick={() => startEdit(cell)}
                         className={cn(
                           "group flex h-8 w-24 items-center justify-between rounded px-2 font-mono text-sm tabular-nums transition-colors",
-                          cell.priceAmount != null ? "text-ink hover:bg-electric-muted" : "text-ink-tertiary/50 hover:bg-electric-muted hover:text-electric"
+                          cell.priceAmount != null ? "text-white hover:bg-white/[0.06]" : "text-ink-onDarkSecondary/50 hover:bg-electric/10 hover:text-[#6FA6FF]"
                         )}
                       >
                         {isSaving ? (

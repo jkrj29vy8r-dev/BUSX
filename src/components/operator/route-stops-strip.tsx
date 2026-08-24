@@ -18,14 +18,14 @@ export function RouteStopsStrip({ stops }: { stops: OperatorRouteStop[] }) {
     <div className="flex flex-wrap items-center gap-1.5">
       {sorted.map((stop, i) => (
         <div key={stop.routeStopId} className="flex items-center gap-1.5">
-          <div className="flex items-center gap-2 rounded-full border border-border bg-surface-inset py-1 pl-1 pr-3">
-            <span className="flex size-5 items-center justify-center rounded-full bg-ink text-[10px] font-bold text-white">
+          <div className="flex items-center gap-2 rounded-full border border-border-dark bg-white/[0.03] py-1 pl-1 pr-3">
+            <span className="flex size-5 items-center justify-center rounded-full bg-white text-[10px] font-bold text-surface-dark">
               {stop.orderIndex}
             </span>
-            <span className="text-xs font-semibold text-ink">{stop.city}</span>
-            <span className="font-mono text-[10px] text-ink-tertiary">{formatOffset(stop.departureOffsetMinutes)}</span>
+            <span className="text-xs font-semibold text-white">{stop.city}</span>
+            <span className="font-mono text-[10px] text-ink-onDarkSecondary">{formatOffset(stop.departureOffsetMinutes)}</span>
           </div>
-          {i < sorted.length - 1 && <ChevronRight className="size-3.5 text-ink-tertiary" strokeWidth={2} />}
+          {i < sorted.length - 1 && <ChevronRight className="size-3.5 text-ink-onDarkSecondary" strokeWidth={2} />}
         </div>
       ))}
     </div>

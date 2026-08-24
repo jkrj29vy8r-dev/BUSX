@@ -154,6 +154,8 @@ model Company {
   status                CompanyStatus @default(pending)
   isVerified            Boolean       @default(false) @map("is_verified")
   verifiedAt            DateTime?     @map("verified_at") @db.Timestamptz(6)
+  /// Array of {name, phone, role} — driver dispatcher/on-call contacts, distinct from the public support_phone.
+  emergencyContacts     Json          @default("[]") @map("emergency_contacts")
   createdAt             DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt             DateTime      @updatedAt @map("updated_at") @db.Timestamptz(6)
 

@@ -6,13 +6,16 @@ import { prisma } from "@/lib/prisma";
 import { signTicketPayload, verifyTicketQrOnServer } from "@/lib/crypto/ticket-hmac";
 import { getSegmentPrice } from "@/lib/services/pricing.service";
 import type {
+  BoardingScanResult,
   BookingId,
+  CompanyId,
   CreateBookingInput,
   CreateBookingResult,
   IssuedTicket,
   TicketId,
   TicketRow,
   TicketVerificationResult,
+  TripId,
 } from "@/types/database";
 
 const EXCLUSION_VIOLATION = "23P01";
@@ -201,6 +204,66 @@ export async function verifyAndCheckInTicket(qrString: string): Promise<
   });
 
   return { valid: true, payload: verification.payload, alreadyCheckedIn: false };
+}
+
+const BOARDABLE_STATUSES = new Set(["paid", "reserved", "checked_in", "boarded"]);
+
+/**
+ * The conductor scanner's actual verification path — a superset of
+ * `verifyAndCheckInTicket`'s crypto check with the two things that
+ * actually matter at a bus door: is this ticket for *this* trip (a
+ * perfectly valid, unexpired ticket for tomorrow's departure, or a
+ * different route entirely, must still flash red here), and is it in a
+ * status that's still allowed to board (not cancelled/refunded/expired).
+ * `expectedCompanyId` is defense in depth — the API route already scopes
+ * `expectedTripId` to a trip it loaded via that company, so a mismatch
+ * here would mean the trip lookup itself was wrong, not that a passenger
+ * did anything unusual.
+ */
+export async function verifyBoardingScan(params: {
+  qrString: string;
+  expectedTripId: TripId;
+  expectedCompanyId: CompanyId;
+}): Promise<BoardingScanResult> {
+  const verification = verifyTicketQrOnServer(params.qrString);
+  if (!verification.valid) return verification;
+
+  const ticket = await prisma.ticket.findUnique({
+    where: { id: verification.payload.ticketId },
+    include: {
+      trip: { select: { id: true, companyId: true } },
+      originStop: { include: { stop: { select: { city: true } } } },
+      destStop: { include: { stop: { select: { city: true } } } },
+    },
+  });
+
+  if (!ticket || ticket.hmacSignature !== params.qrString.split(".").pop()) {
+    return { valid: false, reason: "bad_signature" };
+  }
+  if (ticket.tripId !== params.expectedTripId || ticket.trip.companyId !== params.expectedCompanyId) {
+    return { valid: false, reason: "wrong_trip" };
+  }
+  if (!BOARDABLE_STATUSES.has(ticket.status)) {
+    return { valid: false, reason: "not_boardable" };
+  }
+
+  const alreadyCheckedIn = ticket.status === "checked_in" || ticket.status === "boarded";
+  if (!alreadyCheckedIn) {
+    await prisma.ticket.update({ where: { id: ticket.id }, data: { status: "checked_in", checkedInAt: new Date() } });
+  }
+
+  return {
+    valid: true,
+    alreadyCheckedIn,
+    ticket: {
+      ticketNumber: ticket.ticketNumber,
+      seatNumber: verification.payload.seatNumber,
+      passengerName: ticket.passengerFullName,
+      originCity: ticket.originStop.stop.city,
+      destinationCity: ticket.destStop.stop.city,
+      fareClass: ticket.fareClass,
+    },
+  };
 }
 
 function isExclusionViolation(err: unknown): boolean {
