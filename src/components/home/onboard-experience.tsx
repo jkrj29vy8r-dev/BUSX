@@ -21,7 +21,9 @@ export function OnboardExperience() {
         </div>
 
         <div className="grid grid-cols-1 items-center gap-10 lg:grid-cols-2 lg:gap-16">
-          <BusIllustrationFlat className="w-full drop-shadow-md" />
+          <div className="rounded-3xl bg-gradient-to-b from-blue-50/50 to-transparent p-6">
+            <BusIllustrationFlat className="mx-auto h-auto w-full max-w-md" />
+          </div>
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             {FEATURES.map(({ icon: Icon, label, description }) => (
