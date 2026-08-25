@@ -8,6 +8,7 @@ import { formatWeekdayDate } from "@/lib/format-date";
 import { StopAutocomplete } from "@/components/stop-autocomplete";
 import { PassengerStepper } from "@/components/passenger-stepper";
 import { RouteSwapButton } from "@/components/route-swap-button";
+import { HeroCanvas } from "@/components/hero-canvas";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -61,7 +62,9 @@ export function SearchHero() {
   }
 
   return (
-    <div className="relative overflow-hidden rounded-xl border border-border-dark bg-surface-dark texture-noise p-6 shadow-panel-dark sm:p-8">
+    <div className="relative overflow-hidden rounded-xl border border-border-dark bg-surface-dark p-6 [box-shadow:0_12px_40px_-8px_rgba(0,0,0,0.55),0_0_0_1px_rgba(255,255,255,0.08),0_0_80px_-20px_rgba(0,102,255,0.35)] sm:p-8">
+      <HeroCanvas className="opacity-90" />
+      <div className="pointer-events-none absolute inset-0 texture-noise" />
       <div className="pointer-events-none absolute inset-0 bg-dark-grid-fade" />
 
       <div className="relative">
