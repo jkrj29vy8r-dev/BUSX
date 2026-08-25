@@ -34,7 +34,7 @@ export function StopAutocomplete({ label, placeholder, value, onChange, classNam
 
   return (
     <div ref={containerRef} className={cn("relative flex flex-col gap-1.5", className)}>
-      <label className="text-[11px] font-semibold uppercase tracking-wide text-ink-onDarkSecondary">{label}</label>
+      <label className="text-[11px] font-semibold uppercase tracking-wide text-ink-tertiary">{label}</label>
       <div className="relative">
         <Search className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-ink-tertiary" strokeWidth={2} />
         <input
@@ -48,7 +48,7 @@ export function StopAutocomplete({ label, placeholder, value, onChange, classNam
             setOpen(true);
           }}
           placeholder={placeholder ?? "Oraș sau stație"}
-          className="h-14 w-full rounded-md border border-border bg-white pl-10 pr-3 text-md font-medium text-ink placeholder:font-normal placeholder:text-ink-tertiary transition-colors duration-150 hover:border-border-hover focus:border-electric focus:outline-none focus:ring-2 focus:ring-electric-muted"
+          className="h-14 w-full rounded-md border border-slate-200 bg-slate-50 pl-10 pr-3 text-md font-medium text-ink placeholder:font-normal placeholder:text-ink-tertiary transition-colors duration-150 hover:border-border-hover focus:border-electric focus:bg-white focus:outline-none focus:ring-2 focus:ring-electric-muted"
         />
       </div>
 

@@ -85,10 +85,10 @@ export function RouteChips({ className }: { className?: string }) {
             whileHover={{ y: -1 }}
             whileTap={{ scale: 0.97 }}
             className={cn(
-              "flex items-center gap-1.5 rounded-full border px-3.5 py-2 text-xs font-semibold backdrop-blur-md transition-colors",
+              "flex items-center gap-1.5 rounded-full border px-3.5 py-2 text-xs font-semibold transition-colors",
               isError
-                ? "border-danger/40 bg-danger/10 text-[#FF9FA2]"
-                : "border-white/15 bg-white/[0.05] text-ink-onDarkSecondary shadow-[0_0_18px_-6px_rgba(0,102,255,0.5)] hover:border-electric/50 hover:bg-electric/10 hover:text-white"
+                ? "border-danger/30 bg-danger/[0.06] text-danger"
+                : "border-slate-200 bg-slate-50 text-ink-secondary hover:border-electric hover:bg-electric-muted hover:text-electric"
             )}
           >
             {isPending ? (
