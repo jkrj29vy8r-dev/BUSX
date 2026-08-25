@@ -2,12 +2,18 @@ import { GitBranch, Layers, QrCode, Radio, ShieldCheck } from "lucide-react";
 import { Nav } from "@/components/nav";
 import { BentoTile } from "@/components/bento-tile";
 import { HeroSection } from "@/components/hero/hero-section";
+import { OnboardExperience } from "@/components/home/onboard-experience";
+import { RouteMapExplorer } from "@/components/home/route-map-explorer";
+import { DigitalPassPreview } from "@/components/home/digital-pass-preview";
 
 export default function HomePage() {
   return (
     <div className="min-h-screen">
       <Nav />
       <HeroSection />
+      <OnboardExperience />
+      <RouteMapExplorer />
+      <DigitalPassPreview />
 
       <main className="mx-auto max-w-6xl px-6 py-10 sm:py-16">
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-12 lg:auto-rows-[minmax(0,auto)]">

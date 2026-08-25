@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { CalendarDays, SearchIcon } from "lucide-react";
 import { formatWeekdayDate } from "@/lib/format-date";
@@ -11,7 +11,8 @@ import { RouteChips } from "@/components/hero/route-chips";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import type { StopRow } from "@/types/database";
+import { useHomeSearchStore } from "@/store/home-search-store";
+import type { ApiResult, StopRow } from "@/types/database";
 
 function todayLocalMidnight(): Date {
   const d = new Date();
@@ -39,6 +40,30 @@ export function SearchHero() {
   const [passengers, setPassengers] = useState(1);
   const [datePopoverOpen, setDatePopoverOpen] = useState(false);
 
+  const pendingDestinationQuery = useHomeSearchStore((s) => s.pendingDestinationQuery);
+  const clearPendingDestination = useHomeSearchStore((s) => s.clearPendingDestination);
+
+  // Quick-fill from the route map explorer further down the page: resolve
+  // the requested city against the real stop-search API (same one the
+  // autocomplete uses), then drop it straight into the destination field.
+  useEffect(() => {
+    if (!pendingDestinationQuery) return;
+    let cancelled = false;
+    fetch(`/api/stops/search?q=${encodeURIComponent(pendingDestinationQuery)}`)
+      .then((res) => res.json() as Promise<ApiResult<StopRow[]>>)
+      .then((body) => {
+        if (cancelled || !body.ok) return;
+        const match = body.data[0];
+        if (match) setDestination(match);
+      })
+      .finally(() => {
+        if (!cancelled) clearPendingDestination();
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [pendingDestinationQuery, clearPendingDestination]);
+
   const canSearch = Boolean(origin && destination && origin.id !== destination.id && date);
 
   function handleSwap() {
@@ -61,7 +86,7 @@ export function SearchHero() {
   }
 
   return (
-    <div className="relative rounded-2xl border border-slate-200 bg-white p-6 shadow-xl sm:p-8">
+    <div id="search-dock" className="relative rounded-2xl border border-slate-200 bg-white p-6 shadow-xl sm:p-8">
       <div className="mb-6 flex items-center gap-2">
         <span className="h-1.5 w-1.5 animate-pulse-dot rounded-full bg-emerald" />
         <span className="text-xs font-semibold uppercase tracking-wide text-ink-tertiary">
