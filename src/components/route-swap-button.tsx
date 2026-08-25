@@ -14,12 +14,14 @@ interface RouteSwapButtonProps {
  * rotation plus a tactile press-scale, not a bare hover-color-change icon. */
 export function RouteSwapButton({ onSwap, className }: RouteSwapButtonProps) {
   const [spins, setSpins] = useState(0);
+  const [rippleId, setRippleId] = useState<number | null>(null);
 
   return (
     <motion.button
       type="button"
       onClick={() => {
         setSpins((n) => n + 1);
+        setRippleId(Date.now());
         onSwap();
       }}
       aria-label="Inversează originea și destinația"
@@ -31,6 +33,16 @@ export function RouteSwapButton({ onSwap, className }: RouteSwapButtonProps) {
         className
       )}
     >
+      {rippleId !== null && (
+        <motion.span
+          key={rippleId}
+          initial={{ scale: 0.3, opacity: 0.5 }}
+          animate={{ scale: 2.2, opacity: 0 }}
+          transition={{ duration: 0.5, ease: "easeOut" }}
+          onAnimationComplete={() => setRippleId((cur) => (cur === rippleId ? null : cur))}
+          className="pointer-events-none absolute inset-0 rounded-full bg-electric/40"
+        />
+      )}
       <motion.span
         animate={{ rotate: spins * 180 }}
         transition={{ type: "spring", stiffness: 260, damping: 20 }}

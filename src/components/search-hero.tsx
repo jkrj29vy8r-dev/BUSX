@@ -8,7 +8,7 @@ import { formatWeekdayDate } from "@/lib/format-date";
 import { StopAutocomplete } from "@/components/stop-autocomplete";
 import { PassengerStepper } from "@/components/passenger-stepper";
 import { RouteSwapButton } from "@/components/route-swap-button";
-import { HeroCanvas } from "@/components/hero-canvas";
+import { RouteChips } from "@/components/hero/route-chips";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -26,10 +26,11 @@ function toISODate(d: Date): string {
 }
 
 /**
- * The homepage's control deck: a dark-slate glass panel floating on the
- * light canvas (deliberate inversion for contrast, not a centered white
- * card on white). Origin/destination overlap a swap button at their seam —
- * the classic travel-search tell — with date and passengers as a second,
+ * The homepage's control deck: a translucent glass dock floating over the
+ * cinematic hero's highway canvas (rendered by the parent `HeroSection`,
+ * showing through the backdrop-blur — this component owns no background of
+ * its own). Origin/destination overlap a swap button at their seam — the
+ * classic travel-search tell — with date and passengers as a second,
  * asymmetric row leading into a full-bleed electric CTA.
  */
 export function SearchHero() {
@@ -62,11 +63,7 @@ export function SearchHero() {
   }
 
   return (
-    <div className="relative overflow-hidden rounded-xl border border-border-dark bg-surface-dark p-6 [box-shadow:0_12px_40px_-8px_rgba(0,0,0,0.55),0_0_0_1px_rgba(255,255,255,0.08),0_0_80px_-20px_rgba(0,102,255,0.35)] sm:p-8">
-      <HeroCanvas className="opacity-90" />
-      <div className="pointer-events-none absolute inset-0 texture-noise" />
-      <div className="pointer-events-none absolute inset-0 bg-dark-grid-fade" />
-
+    <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-surface-dark/75 p-6 shadow-2xl backdrop-blur-xl [box-shadow:0_25px_70px_-15px_rgba(0,0,0,0.7),0_0_0_1px_rgba(255,255,255,0.08),0_0_90px_-25px_rgba(0,102,255,0.45)] sm:p-8">
       <div className="relative">
         <div className="mb-6 flex items-center gap-2">
           <span className="h-1.5 w-1.5 animate-pulse-dot rounded-full bg-emerald" />
@@ -125,14 +122,25 @@ export function SearchHero() {
                 variant="electric"
                 size="lg"
                 disabled={!canSearch}
-                className="h-14 w-full gap-2 sm:w-auto sm:px-8"
+                className="group relative h-14 w-full gap-2 overflow-hidden sm:w-auto sm:px-8"
               >
-                <SearchIcon className="size-4" strokeWidth={2.25} />
-                Caută
+                <span
+                  aria-hidden
+                  className="pointer-events-none absolute inset-y-0 -left-1/2 w-1/2 -skew-x-12 bg-white/25 opacity-0 transition-[transform,opacity] duration-700 ease-out group-hover:translate-x-[calc(100%+200%)] group-hover:opacity-100"
+                />
+                <SearchIcon className="relative size-4" strokeWidth={2.25} />
+                <span className="relative">Caută Curse Express</span>
               </Button>
             </motion.div>
           </div>
         </form>
+
+        <div className="mt-5 border-t border-white/10 pt-4">
+          <div className="mb-2.5 text-[11px] font-semibold uppercase tracking-wide text-ink-onDarkSecondary/80">
+            Rute populare
+          </div>
+          <RouteChips />
+        </div>
       </div>
     </div>
   );
