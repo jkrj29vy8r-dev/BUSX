@@ -33,9 +33,14 @@ function SteeringWheel({ className }: { className?: string }) {
  * A tactile, realistic 2D bus interior — driver cabin + door at the front,
  * a real aisle gap, and (data-driven, not hardcoded) a contiguous back
  * bench row wherever the layout actually fills every column on the last
- * row. Four seat states: available, selected (electric glow), occupied for
+ * row. Four seat states: available, selected (brand mint glow), occupied for
  * this exact segment (dynamic capacity — the same seat can be open on a
  * different search), and VIP (premium seat_type, gold accent).
+ *
+ * The row/column/aisle grid comes from the vehicle's real `seat_layout`
+ * (Fleet Builder-configured per vehicle), not a hardcoded 2x2/2x1 keyed off
+ * vehicle type — a minibus and a coach can both exist in either layout, and
+ * this renders whatever the operator actually configured.
  */
 export function SeatPicker({
   layout,
@@ -162,22 +167,22 @@ function SeatGlyph({
       <span
         className={cn(
           "absolute top-0 h-2.5 w-5 rounded-t-[5px] border-x-2 border-t-2",
-          isSelected ? "border-electric bg-electric" : isBlocked ? "border-ink/10 bg-ink/[0.05]" : isVip ? "border-gold/60 bg-gold/10" : "border-ink/15 bg-white"
+          isSelected ? "border-emerald bg-emerald" : isBlocked ? "border-slate-200 bg-slate-200" : isVip ? "border-gold/60 bg-gold/10" : "border-ink/15 bg-white"
         )}
       />
       {/* seat base */}
       <span
         className={cn(
           "relative flex size-9 translate-y-1 items-center justify-center rounded-md border-2 text-[11px] font-bold tabular-nums transition-colors duration-150",
-          isSelected && "border-electric bg-electric text-white shadow-glow",
+          isSelected && "border-emerald bg-emerald text-white shadow-glow-emerald",
           isVip && !isSelected && !isBlocked && "border-gold bg-gold/[0.07] text-gold",
           !isSelected &&
             !isVip &&
             !isBlocked &&
             !isDisabledByCapacity &&
-            "border-ink/15 bg-white text-ink-secondary hover:border-electric hover:bg-electric-muted hover:text-electric",
+            "border-ink/15 bg-white text-ink-secondary hover:border-emerald hover:bg-emerald-muted hover:text-emerald",
           isDisabledByCapacity && !isBlocked && "border-ink/10 bg-white text-ink-tertiary/40 cursor-not-allowed",
-          isBlocked && "border-transparent bg-ink/[0.06] text-ink-tertiary/40 cursor-not-allowed"
+          isBlocked && "border-slate-200 bg-slate-200 text-slate-400 cursor-not-allowed"
         )}
       >
         {isPending ? (
@@ -217,8 +222,8 @@ function SeatPickerLegend({
   return (
     <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-ink-tertiary">
       <LegendItem swatch="border-2 border-ink/15 bg-white" label={standardPriceAmount != null ? `Liber · ${standardPriceAmount.toFixed(0)} ${currency}` : "Liber"} />
-      <LegendItem swatch="border-2 border-electric bg-electric" label="Selectat" />
-      <LegendItem swatch="border-2 border-transparent bg-ink/[0.06]" label="Ocupat pentru acest segment" />
+      <LegendItem swatch="border-2 border-emerald bg-emerald" label="Selectat" />
+      <LegendItem swatch="border-2 border-slate-200 bg-slate-200" label="Ocupat pentru acest segment" />
       {hasVipPricing && (
         <LegendItem
           swatch="border-2 border-gold bg-gold/10"

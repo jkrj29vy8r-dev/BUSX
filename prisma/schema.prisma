@@ -156,6 +156,10 @@ model Company {
   verifiedAt            DateTime?     @map("verified_at") @db.Timestamptz(6)
   /// Array of {name, phone, role} — driver dispatcher/on-call contacts, distinct from the public support_phone.
   emergencyContacts     Json          @default("[]") @map("emergency_contacts")
+  /// Denormalized avg(reviews.rating), maintained by the refresh_company_rating trigger. NULL until the first review.
+  averageRating         Decimal?      @map("average_rating") @db.Decimal(2, 1)
+  /// Denormalized count(reviews.*), maintained by the refresh_company_rating trigger.
+  ratingCount           Int           @default(0) @map("rating_count")
   createdAt             DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt             DateTime      @updatedAt @map("updated_at") @db.Timestamptz(6)
 
@@ -163,6 +167,7 @@ model Company {
   routes   Route[]
   vehicles Vehicle[]
   trips    Trip[]
+  reviews  Review[]
 
   @@map("companies")
 }
@@ -183,6 +188,7 @@ model Profile {
   bookings          Booking[]
   seatLocks         SeatLock[]
   tickets           Ticket[]
+  reviews           Review[]
 
   @@index([companyId])
   @@map("profiles")
@@ -389,9 +395,35 @@ model Booking {
 
   user    Profile? @relation(fields: [userId], references: [id])
   tickets Ticket[]
+  review  Review?
 
   @@index([userId])
   @@map("bookings")
+}
+
+/// One review per booking (unique on bookingId) — write access is gated in
+/// Postgres RLS (reviews_passenger_write, migration 0004) to bookings that
+/// actually hold a valid ticket with the reviewed operator, not just app-layer
+/// trust. companies.averageRating/ratingCount are kept in sync by a trigger,
+/// not a generated column — Postgres can't generate a column from an
+/// aggregate over a related table.
+model Review {
+  id          String   @id @default(uuid()) @db.Uuid
+  operatorId  String   @map("operator_id") @db.Uuid
+  passengerId String   @map("passenger_id") @db.Uuid
+  bookingId   String   @unique @map("booking_id") @db.Uuid
+  rating      Int      @db.SmallInt
+  comment     String?
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  operator  Company @relation(fields: [operatorId], references: [id], onDelete: Cascade)
+  passenger Profile @relation(fields: [passengerId], references: [id], onDelete: Cascade)
+  booking   Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+
+  @@index([operatorId])
+  @@index([passengerId])
+  @@map("reviews")
 }
 
 /// Temporary hold. `segmentRange` (int4range, GENERATED ALWAYS AS STORED) and

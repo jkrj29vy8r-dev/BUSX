@@ -74,6 +74,7 @@ const config: Config = {
         "panel-dark": "0 12px 40px -8px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,255,255,0.08)",
         glow: "0 0 0 3px rgba(0,102,255,0.16), 0 2px 8px -2px rgba(0,102,255,0.5)",
         "glow-gold": "0 0 0 3px rgba(200,149,46,0.18), 0 2px 8px -2px rgba(200,149,46,0.45)",
+        "glow-emerald": "0 0 0 3px rgba(0,208,132,0.18), 0 2px 8px -2px rgba(0,208,132,0.5)",
       },
       transitionTimingFunction: {
         snap: "cubic-bezier(0.16, 1, 0.3, 1)",

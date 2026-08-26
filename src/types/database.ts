@@ -26,6 +26,7 @@ export type TripStopTimeId = Brand<string, "TripStopTimeId">;
 export type BookingId = Brand<string, "BookingId">;
 export type SeatLockId = Brand<string, "SeatLockId">;
 export type TicketId = Brand<string, "TicketId">;
+export type ReviewId = Brand<string, "ReviewId">;
 
 export type ISODateTime = string; // e.g. "2026-08-24T14:30:00.000Z"
 export type ISODate = string; // e.g. "2026-08-24"
@@ -80,6 +81,11 @@ export interface CompanyRow {
   is_verified: boolean;
   verified_at: ISODateTime | null;
   emergency_contacts: EmergencyContact[];
+  /** Denormalized avg(reviews.rating) — null until the operator has a first
+   * review. Maintained by refresh_company_rating() (migration 0004), never
+   * written directly. */
+  average_rating: number | null;
+  rating_count: number;
   created_at: ISODateTime;
   updated_at: ISODateTime;
 }
@@ -236,6 +242,20 @@ export interface BookingRow {
   payment_status: PaymentStatus;
   payment_provider: string | null;
   payment_reference: string | null;
+  created_at: ISODateTime;
+  updated_at: ISODateTime;
+}
+
+/** One review per booking (unique on booking_id) — see migration 0004 for
+ * why write access is RLS-gated to bookings holding a real, non-cancelled
+ * ticket with the reviewed operator, not just app-layer trust. */
+export interface ReviewRow {
+  id: ReviewId;
+  operator_id: CompanyId;
+  passenger_id: ProfileId;
+  booking_id: BookingId;
+  rating: number;
+  comment: string | null;
   created_at: ISODateTime;
   updated_at: ISODateTime;
 }

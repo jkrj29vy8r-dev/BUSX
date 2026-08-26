@@ -1,14 +1,15 @@
 "use client";
 
-import { Suspense, useEffect } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
-import { AlertTriangle, ShieldCheck, TimerReset } from "lucide-react";
+import { AlertTriangle, ChevronUp, ShieldCheck, TimerReset } from "lucide-react";
 import { Nav } from "@/components/nav";
 import { MetroTimeline } from "@/components/metro-timeline";
 import { MapPinPreview } from "@/components/map-pin-preview";
 import { SeatPicker } from "@/components/seat-picker";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Drawer } from "@/components/ui/drawer";
 import { useTripDetail } from "@/hooks/use-trip-detail";
 import { useSeatMap } from "@/hooks/use-seat-map";
 import { useCreateSeatLock, useReleaseSeatLock } from "@/hooks/use-seat-lock";
@@ -16,6 +17,8 @@ import { useCountdown, formatCountdown } from "@/hooks/use-countdown";
 import { useBookingStore } from "@/store/booking-store";
 import { VEHICLE_TYPE_LABELS } from "@/lib/vehicle-labels";
 import type { RouteStopId, SeatAvailability, TripId } from "@/types/database";
+
+const FARE_CLASS_LABELS: Record<string, string> = { standard: "Standard", premium: "VIP" };
 
 export default function TripSeatSelectionPage() {
   return (
@@ -52,6 +55,7 @@ function TripSeatSelectionContent() {
 
   const { data: tripDetail, isLoading: tripLoading } = useTripDetail(tripId);
   const { data: seatMap, isLoading: seatsLoading } = useSeatMap(tripId, originRouteStopId, destinationRouteStopId);
+  const [summaryOpen, setSummaryOpen] = useState(false);
 
   const startSegmentSelection = useBookingStore((s) => s.startSegmentSelection);
   const selectedSeats = useBookingStore((s) => s.selectedSeats);
@@ -200,21 +204,70 @@ function TripSeatSelectionContent() {
       {selectedSeats.length > 0 && (
         <div className="fixed inset-x-0 bottom-0 border-t border-border bg-white/95 backdrop-blur-md">
           <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-4">
-            <div>
-              <div className="text-sm text-ink-secondary">
-                {selectedSeats.length} / {passengers} {passengers === 1 ? "loc selectat" : "locuri selectate"} ·{" "}
-                {selectedSeats.length === 1 ? "locul" : "locurile"} {selectedSeats.map((s) => s.seatNumber).join(", ")}
+            <button
+              type="button"
+              onClick={() => setSummaryOpen(true)}
+              className="group flex items-center gap-2 rounded-md px-1 py-1 text-left transition-colors hover:bg-ink/[0.04]"
+            >
+              <div>
+                <div className="flex items-center gap-1 text-sm text-ink-secondary">
+                  {selectedSeats.length} / {passengers} {passengers === 1 ? "loc selectat" : "locuri selectate"}
+                  <ChevronUp className="size-3.5 text-ink-tertiary transition-transform group-hover:-translate-y-0.5" strokeWidth={2} />
+                </div>
+                <div className="text-xl font-extrabold tabular-nums text-ink">
+                  {total.toFixed(0)} <span className="text-sm font-normal text-ink-tertiary">{currency}</span>
+                </div>
               </div>
-              <div className="text-xl font-extrabold tabular-nums text-ink">
-                {total.toFixed(0)} <span className="text-sm font-normal text-ink-tertiary">{currency}</span>
-              </div>
-            </div>
+            </button>
             <Button variant="electric" size="lg" disabled={!readyToCheckout} onClick={() => router.push("/checkout")}>
-              Continuă spre finalizare
+              Continuă spre Date Pasager
             </Button>
           </div>
         </div>
       )}
+
+      <Drawer
+        open={summaryOpen}
+        onOpenChange={setSummaryOpen}
+        title="Rezumatul selecției"
+        subtitle={originLabel && destinationLabel ? `${originLabel} → ${destinationLabel}` : undefined}
+      >
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-2">
+            {selectedSeats.map((seat) => (
+              <div key={seat.seatId} className="flex items-center justify-between rounded-md border border-border px-3.5 py-2.5">
+                <div>
+                  <div className="text-sm font-semibold text-ink">Locul {seat.seatNumber}</div>
+                  <div className="text-xs text-ink-tertiary">{FARE_CLASS_LABELS[seat.fareClass] ?? seat.fareClass}</div>
+                </div>
+                <div className="text-sm font-bold tabular-nums text-ink">
+                  {seat.priceAmount.toFixed(0)} <span className="font-normal text-ink-tertiary">{currency}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="flex items-center justify-between border-t border-border pt-4">
+            <span className="text-sm font-semibold text-ink">Total</span>
+            <span className="text-xl font-extrabold tabular-nums text-ink">
+              {total.toFixed(0)} <span className="text-sm font-normal text-ink-tertiary">{currency}</span>
+            </span>
+          </div>
+
+          <Button
+            variant="electric"
+            size="lg"
+            className="w-full"
+            disabled={!readyToCheckout}
+            onClick={() => {
+              setSummaryOpen(false);
+              router.push("/checkout");
+            }}
+          >
+            Continuă spre Date Pasager
+          </Button>
+        </div>
+      </Drawer>
     </div>
   );
 }
