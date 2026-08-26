@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LayoutDashboard, GitBranch, CalendarClock, Truck, Settings, ExternalLink, ShieldCheck, ScanLine } from "lucide-react";
 import { useOperatorCompany } from "@/hooks/use-operator";
+import { BusxLogo } from "@/components/brand/busx-logo";
 import { cn } from "@/lib/cn";
 
 interface OperatorShellProps {
@@ -45,9 +46,7 @@ export function OperatorShell({ companySlug, children }: OperatorShellProps) {
     <div className="flex min-h-screen bg-surface-dark text-ink-onDark">
       <aside className="flex w-60 shrink-0 flex-col border-r border-border-dark">
         <Link href="/" className="flex items-center px-5 py-5">
-          <span className="text-md font-extrabold tracking-tight">
-            BUS<span className="text-emerald">X</span>
-          </span>
+          <BusxLogo className="h-4 w-auto" />
           <span className="ml-auto rounded border border-border-dark px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-ink-onDarkSecondary">
             Operator
           </span>

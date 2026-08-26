@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { ShieldCheck } from "lucide-react";
 import { useOperatorCompanies } from "@/hooks/use-operator";
+import { BusxLogo } from "@/components/brand/busx-logo";
 
 const STATUS_LABELS: Record<string, string> = {
   pending: "în așteptare",
@@ -27,9 +28,7 @@ export default function OperatorPickerPage() {
     <div className="flex min-h-screen items-center justify-center bg-canvas px-6">
       <div className="w-full max-w-md">
         <div className="mb-8 flex flex-col items-center gap-3 text-center">
-          <span className="text-2xl font-extrabold tracking-tight text-ink">
-            BUS<span className="text-emerald">X</span>
-          </span>
+          <BusxLogo className="h-7 w-auto text-ink" />
           <h1 className="text-xl font-extrabold tracking-tight text-ink">Panou operator</h1>
           <p className="text-sm text-ink-secondary">Alege operatorul pentru a continua.</p>
         </div>

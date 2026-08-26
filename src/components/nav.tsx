@@ -1,20 +1,19 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { BusxLogo } from "@/components/brand/busx-logo";
 
 /**
- * The wordmark is deliberately just type, no icon glyph — "BUS" plus an X
- * marked in emerald. The X is the story: it's the point where routes
- * cross — the same seat, sold across crossing, non-overlapping segments,
- * is the one idea this whole product is built around.
+ * The wordmark's story is the S→X ligature itself: the bottom curve of the
+ * S flows in one unbroken stroke into the X's rising diagonal — the point
+ * where routes cross, the same seat sold across crossing, non-overlapping
+ * segments, is the one idea this whole product is built around.
  */
 export function Nav() {
   return (
     <header className="sticky top-0 z-40 border-b border-border-dark glass-dark">
       <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-6">
         <Link href="/" className="flex items-center text-ink-onDark">
-          <span className="text-lg font-extrabold tracking-tight">
-            BUS<span className="text-emerald">X</span>
-          </span>
+          <BusxLogo className="h-5 w-auto" />
         </Link>
 
         <nav className="hidden items-center gap-6 text-sm font-medium text-ink-onDarkSecondary sm:flex">
