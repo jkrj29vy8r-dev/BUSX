@@ -13,14 +13,21 @@ interface StopAutocompleteProps {
   value: StopRow | null;
   onChange: (stop: StopRow) => void;
   className?: string;
+  /** "boxed" (default): the original bordered field with its own label and
+   * search icon, for the stacked mobile form. "bare": no border, background,
+   * or icon of its own — a label-over-value pair meant to sit directly
+   * inside a shared pill container (the desktop search dock) with the pill
+   * itself supplying the shape. */
+  variant?: "boxed" | "bare";
 }
 
 /** Omio-style origin/destination picker: type a city or station, pick from a live dropdown. */
-export function StopAutocomplete({ label, placeholder, value, onChange, className }: StopAutocompleteProps) {
+export function StopAutocomplete({ label, placeholder, value, onChange, className, variant = "boxed" }: StopAutocompleteProps) {
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const { data: results, isFetching } = useStopSearch(query);
+  const bare = variant === "bare";
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -33,10 +40,19 @@ export function StopAutocomplete({ label, placeholder, value, onChange, classNam
   }, []);
 
   return (
-    <div ref={containerRef} className={cn("relative flex flex-col gap-1.5", className)}>
-      <label className="text-[11px] font-semibold uppercase tracking-wide text-ink-tertiary">{label}</label>
+    <div ref={containerRef} className={cn("relative flex flex-col", bare ? "justify-center gap-0.5" : "gap-1.5", className)}>
+      <label
+        className={cn(
+          "font-semibold uppercase tracking-wide text-ink-tertiary",
+          bare ? "text-[10px] leading-none" : "text-[11px]"
+        )}
+      >
+        {label}
+      </label>
       <div className="relative">
-        <Search className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-ink-tertiary" strokeWidth={2} />
+        {!bare && (
+          <Search className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-ink-tertiary" strokeWidth={2} />
+        )}
         <input
           value={open ? query : value ? `${value.city} · ${value.name}` : ""}
           onChange={(e) => {
@@ -48,7 +64,12 @@ export function StopAutocomplete({ label, placeholder, value, onChange, classNam
             setOpen(true);
           }}
           placeholder={placeholder ?? "Oraș sau stație"}
-          className="h-14 w-full rounded-md border border-slate-200 bg-slate-50 pl-10 pr-3 text-md font-medium text-ink placeholder:font-normal placeholder:text-ink-tertiary transition-colors duration-150 hover:border-border-hover focus:border-electric focus:bg-white focus:outline-none focus:ring-2 focus:ring-electric-muted"
+          className={cn(
+            "w-full text-ink placeholder:text-ink-tertiary transition-colors duration-150",
+            bare
+              ? "truncate border-0 bg-transparent p-0 text-sm font-semibold placeholder:font-normal focus:outline-none"
+              : "h-14 rounded-md border border-slate-200 bg-slate-50 pl-10 pr-3 text-md font-medium placeholder:font-normal hover:border-border-hover focus:border-electric focus:bg-white focus:outline-none focus:ring-2 focus:ring-electric-muted"
+          )}
         />
       </div>
 
@@ -59,7 +80,10 @@ export function StopAutocomplete({ label, placeholder, value, onChange, classNam
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -6, scale: 0.98 }}
             transition={{ duration: 0.14, ease: [0.16, 1, 0.3, 1] }}
-            className="absolute left-0 right-0 top-full z-30 mt-1.5 max-h-72 overflow-y-auto rounded-lg border border-border bg-white shadow-panel"
+            className={cn(
+              "absolute left-0 z-30 mt-1.5 max-h-72 overflow-y-auto rounded-lg border border-border bg-white shadow-panel",
+              bare ? "w-72 max-w-[80vw]" : "right-0"
+            )}
           >
             {isFetching && <div className="px-3.5 py-3 text-sm text-ink-tertiary">Se caută…</div>}
             {!isFetching && results?.length === 0 && (

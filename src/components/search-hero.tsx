@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { CalendarDays, SearchIcon } from "lucide-react";
+import { CalendarDays, SearchIcon, Users } from "lucide-react";
 import { formatWeekdayDate } from "@/lib/format-date";
 import { StopAutocomplete } from "@/components/stop-autocomplete";
 import { PassengerStepper } from "@/components/passenger-stepper";
@@ -26,11 +26,11 @@ function toISODate(d: Date): string {
 }
 
 /**
- * The homepage's control deck and the hero's one visual centerpiece: a
- * plain white card — sharp border, real elevation, no glass or glow —
- * sitting on the hero's light canvas. Origin/destination overlap a swap
- * button at their seam — the classic travel-search tell — with date and
- * passengers as a second, asymmetric row leading into a solid electric CTA.
+ * The homepage's control deck and the hero's one visual centerpiece.
+ * Two markups share one form: a single-line pill (`md:` and up) matching
+ * the Kayak/Google-Flights convention travelers already know, and the
+ * original stacked card below `md` where a one-line dock would force
+ * every field down to an unusable width.
  */
 export function SearchHero() {
   const router = useRouter();
@@ -42,6 +42,8 @@ export function SearchHero() {
 
   const pendingDestinationQuery = useHomeSearchStore((s) => s.pendingDestinationQuery);
   const clearPendingDestination = useHomeSearchStore((s) => s.clearPendingDestination);
+  const pendingRoute = useHomeSearchStore((s) => s.pendingRoute);
+  const clearPendingRoute = useHomeSearchStore((s) => s.clearPendingRoute);
 
   // Quick-fill from the route map explorer further down the page: resolve
   // the requested city against the real stop-search API (same one the
@@ -64,6 +66,16 @@ export function SearchHero() {
     };
   }, [pendingDestinationQuery, clearPendingDestination]);
 
+  // Quick-fill from a popular-route chip: both stops are already resolved,
+  // so just drop them straight in — the traveler still picks date/passengers
+  // and hits search themselves.
+  useEffect(() => {
+    if (!pendingRoute) return;
+    setOrigin(pendingRoute.origin);
+    setDestination(pendingRoute.destination);
+    clearPendingRoute();
+  }, [pendingRoute, clearPendingRoute]);
+
   const canSearch = Boolean(origin && destination && origin.id !== destination.id && date);
 
   function handleSwap() {
@@ -85,61 +97,123 @@ export function SearchHero() {
     router.push(`/search?${params.toString()}`);
   }
 
+  const dateTrigger = (bare: boolean) => (
+    <Popover open={datePopoverOpen} onOpenChange={setDatePopoverOpen}>
+      <PopoverTrigger asChild>
+        {bare ? (
+          <button
+            type="button"
+            className="flex h-full min-w-[9.5rem] flex-col justify-center border-l border-slate-200 px-4 py-2 text-left transition-colors hover:bg-slate-50"
+          >
+            <span className="text-[10px] font-semibold uppercase tracking-wide text-ink-tertiary leading-none">Data plecării</span>
+            <span className="mt-1 flex items-center gap-1.5 truncate text-sm font-semibold text-ink">
+              <CalendarDays className="size-3.5 shrink-0 text-ink-tertiary" strokeWidth={1.75} />
+              {formatWeekdayDate(date)}
+            </span>
+          </button>
+        ) : (
+          <button
+            type="button"
+            className="flex h-14 items-center gap-2.5 rounded-md border border-slate-200 bg-slate-50 px-3.5 text-left text-md font-medium text-ink transition-colors hover:border-border-hover focus:border-electric focus:bg-white focus:outline-none focus:ring-2 focus:ring-electric-muted"
+          >
+            <CalendarDays className="size-4 shrink-0 text-ink-tertiary" strokeWidth={1.75} />
+            {formatWeekdayDate(date)}
+          </button>
+        )}
+      </PopoverTrigger>
+      <PopoverContent>
+        <Calendar
+          mode="single"
+          selected={date}
+          onSelect={(d) => {
+            if (d) {
+              setDate(d);
+              setDatePopoverOpen(false);
+            }
+          }}
+          disabled={{ before: todayLocalMidnight() }}
+        />
+      </PopoverContent>
+    </Popover>
+  );
+
+  const passengerTrigger = (
+    <Popover>
+      <PopoverTrigger asChild>
+        <button
+          type="button"
+          className="flex h-full min-w-[7rem] flex-col justify-center border-l border-slate-200 px-4 py-2 text-left transition-colors hover:bg-slate-50"
+        >
+          <span className="text-[10px] font-semibold uppercase tracking-wide text-ink-tertiary leading-none">Pasageri</span>
+          <span className="mt-1 flex items-center gap-1.5 text-sm font-semibold text-ink">
+            <Users className="size-3.5 shrink-0 text-ink-tertiary" strokeWidth={1.75} />
+            {passengers}
+          </span>
+        </button>
+      </PopoverTrigger>
+      <PopoverContent className="w-56">
+        <PassengerStepper value={passengers} onChange={setPassengers} />
+      </PopoverContent>
+    </Popover>
+  );
+
   return (
-    <div id="search-dock" className="relative rounded-2xl border border-slate-200 bg-white p-6 shadow-xl sm:p-8">
-      <div className="mb-6 flex items-center gap-2">
-        <span className="h-1.5 w-1.5 animate-pulse-dot rounded-full bg-emerald" />
-        <span className="text-xs font-semibold uppercase tracking-wide text-ink-tertiary">
-          Live, la toți operatorii
-        </span>
-      </div>
+    <div id="search-dock" className="relative">
+      <form onSubmit={handleSubmit}>
+        {/* Desktop / tablet: single-line pill dock */}
+        <div className="hidden items-stretch rounded-full border border-slate-200/80 bg-white p-2 shadow-2xl md:flex">
+          <StopAutocomplete
+            variant="bare"
+            className="min-w-0 flex-[1.3] px-4 py-1"
+            label="De la"
+            placeholder="Oraș de plecare"
+            value={origin}
+            onChange={setOrigin}
+          />
 
-      <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-        <div className="relative grid grid-cols-1 gap-3 sm:grid-cols-2">
-          <StopAutocomplete label="De la" placeholder="Oraș sau stație de plecare" value={origin} onChange={setOrigin} />
-          <StopAutocomplete label="Până la" placeholder="Oraș sau stație de destinație" value={destination} onChange={setDestination} />
-
-          <div className="absolute left-1/2 top-1/2 z-10 hidden -translate-x-1/2 translate-y-1 sm:block">
+          <div className="flex shrink-0 items-center px-1">
             <RouteSwapButton onSwap={handleSwap} />
           </div>
-          <div className="flex justify-center sm:hidden">
-            <RouteSwapButton onSwap={handleSwap} className="rotate-90" />
+
+          <StopAutocomplete
+            variant="bare"
+            className="min-w-0 flex-[1.3] border-l border-slate-200 px-4 py-1"
+            label="Până la"
+            placeholder="Oraș de destinație"
+            value={destination}
+            onChange={setDestination}
+          />
+
+          {dateTrigger(true)}
+          {passengerTrigger}
+
+          <div className="flex shrink-0 items-center pl-2">
+            <Button type="submit" variant="electric" size="lg" disabled={!canSearch} className="h-12 gap-2 rounded-full px-6">
+              <SearchIcon className="size-4" strokeWidth={2.25} />
+              Caută Curse Express
+            </Button>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-[1.4fr_1fr_auto]">
-          <div className="flex flex-col gap-1.5">
-            <label className="text-[11px] font-semibold uppercase tracking-wide text-ink-tertiary">Data plecării</label>
-            <Popover open={datePopoverOpen} onOpenChange={setDatePopoverOpen}>
-              <PopoverTrigger asChild>
-                <button
-                  type="button"
-                  className="flex h-14 items-center gap-2.5 rounded-md border border-slate-200 bg-slate-50 px-3.5 text-left text-md font-medium text-ink transition-colors hover:border-border-hover focus:border-electric focus:bg-white focus:outline-none focus:ring-2 focus:ring-electric-muted"
-                >
-                  <CalendarDays className="size-4 shrink-0 text-ink-tertiary" strokeWidth={1.75} />
-                  {formatWeekdayDate(date)}
-                </button>
-              </PopoverTrigger>
-              <PopoverContent>
-                <Calendar
-                  mode="single"
-                  selected={date}
-                  onSelect={(d) => {
-                    if (d) {
-                      setDate(d);
-                      setDatePopoverOpen(false);
-                    }
-                  }}
-                  disabled={{ before: todayLocalMidnight() }}
-                />
-              </PopoverContent>
-            </Popover>
+        {/* Mobile: stacked card */}
+        <div className="flex flex-col gap-3 rounded-2xl border border-slate-200 bg-white p-6 shadow-xl md:hidden">
+          <div className="relative grid grid-cols-1 gap-3">
+            <StopAutocomplete label="De la" placeholder="Oraș sau stație de plecare" value={origin} onChange={setOrigin} />
+            <StopAutocomplete label="Până la" placeholder="Oraș sau stație de destinație" value={destination} onChange={setDestination} />
+            <div className="flex justify-center">
+              <RouteSwapButton onSwap={handleSwap} className="rotate-90" />
+            </div>
           </div>
 
-          <PassengerStepper value={passengers} onChange={setPassengers} />
+          <div className="grid grid-cols-1 gap-3">
+            <div className="flex flex-col gap-1.5">
+              <label className="text-[11px] font-semibold uppercase tracking-wide text-ink-tertiary">Data plecării</label>
+              {dateTrigger(false)}
+            </div>
 
-          <div className="flex sm:items-end">
-            <Button type="submit" variant="electric" size="lg" disabled={!canSearch} className="h-14 w-full gap-2 sm:w-auto sm:px-8">
+            <PassengerStepper value={passengers} onChange={setPassengers} />
+
+            <Button type="submit" variant="electric" size="lg" disabled={!canSearch} className="h-14 w-full gap-2">
               <SearchIcon className="size-4" strokeWidth={2.25} />
               Caută Curse Express
             </Button>
@@ -147,8 +221,8 @@ export function SearchHero() {
         </div>
       </form>
 
-      <div className="mt-5 border-t border-slate-100 pt-4">
-        <div className="mb-2.5 text-[11px] font-semibold uppercase tracking-wide text-ink-tertiary">Rute populare</div>
+      <div className="mt-5 flex flex-wrap items-center justify-center gap-2 sm:justify-start">
+        <span className="text-[11px] font-semibold uppercase tracking-wide text-ink-tertiary">Rute populare</span>
         <RouteChips />
       </div>
     </div>

@@ -1,11 +1,7 @@
 import { CheckCircle2 } from "lucide-react";
 import { cn } from "@/lib/cn";
 
-const ITEMS = [
-  "Rezervare instantă în 30 de secunde",
-  "Bilet digital pe telefon (cod QR)",
-  "Peste 50+ de operatori validați",
-];
+const ITEMS = ["Rezervare instantă în 30s", "Bilet QR pe telefon", "50+ operatori validați"];
 
 /** The trust strip beneath the search dock — plain checkmarks stating what
  * the product actually does, not a badge wall. */

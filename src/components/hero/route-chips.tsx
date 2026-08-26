@@ -1,10 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { AlertTriangle, ArrowRight, Loader2 } from "lucide-react";
 import { cn } from "@/lib/cn";
+import { useHomeSearchStore } from "@/store/home-search-store";
 import type { ApiResult, StopRow } from "@/types/database";
 
 interface QuickRoute {
@@ -20,13 +20,6 @@ const ROUTES: QuickRoute[] = [
   { fromLabel: "Bacău", toLabel: "București", fromQuery: "Bacău", toQuery: "București" },
 ];
 
-function todayISODate(): string {
-  const d = new Date();
-  d.setHours(0, 0, 0, 0);
-  const offset = d.getTimezoneOffset();
-  return new Date(d.getTime() - offset * 60_000).toISOString().slice(0, 10);
-}
-
 async function resolveStop(q: string): Promise<StopRow | null> {
   const res = await fetch(`/api/stops/search?q=${encodeURIComponent(q)}`);
   const body = (await res.json()) as ApiResult<StopRow[]>;
@@ -37,12 +30,14 @@ async function resolveStop(q: string): Promise<StopRow | null> {
 /**
  * One-tap shortcuts for the routes BUSX actually sells most — each chip
  * resolves both cities against the real /api/stops/search (the same
- * endpoint the autocomplete uses) before navigating, so a route that isn't
- * seeded on a given environment fails honestly in the chip itself instead
- * of landing on a silently-empty results page.
+ * endpoint the autocomplete uses), so a route that isn't seeded on a given
+ * environment fails honestly in the chip itself. On success it fills the
+ * search dock's origin/destination fields (via the shared home-search
+ * store) rather than jumping straight to results, so the traveler still
+ * confirms the date/passenger count before searching.
  */
 export function RouteChips({ className }: { className?: string }) {
-  const router = useRouter();
+  const requestRoute = useHomeSearchStore((s) => s.requestRoute);
   const [pendingIndex, setPendingIndex] = useState<number | null>(null);
   const [errorIndex, setErrorIndex] = useState<number | null>(null);
 
@@ -58,15 +53,12 @@ export function RouteChips({ className }: { className?: string }) {
         setTimeout(() => setErrorIndex((cur) => (cur === index ? null : cur)), 2400);
         return;
       }
-      const params = new URLSearchParams({
-        originStopId: origin.id,
-        destinationStopId: destination.id,
-        originLabel: origin.city,
-        destinationLabel: destination.city,
-        date: todayISODate(),
-        passengers: "1",
-      });
-      router.push(`/search?${params.toString()}`);
+      requestRoute(origin, destination);
+    } catch {
+      // Same honest "unavailable" state as a not-found stop — a network or
+      // API failure shouldn't surface as an uncaught console error.
+      setErrorIndex(index);
+      setTimeout(() => setErrorIndex((cur) => (cur === index ? null : cur)), 2400);
     } finally {
       setPendingIndex((cur) => (cur === index ? null : cur));
     }
