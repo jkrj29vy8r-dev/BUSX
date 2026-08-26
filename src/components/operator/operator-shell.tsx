@@ -46,7 +46,7 @@ export function OperatorShell({ companySlug, children }: OperatorShellProps) {
     <div className="flex min-h-screen bg-surface-dark text-ink-onDark">
       <aside className="flex w-60 shrink-0 flex-col border-r border-border-dark">
         <Link href="/" className="flex items-center px-5 py-5">
-          <BusxLogo className="h-4 w-auto" />
+          <BusxLogo className="h-4 w-auto" variant="dark" />
           <span className="ml-auto rounded border border-border-dark px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-ink-onDarkSecondary">
             Operator
           </span>
