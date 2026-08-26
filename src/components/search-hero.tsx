@@ -44,6 +44,8 @@ export function SearchHero() {
   const clearPendingDestination = useHomeSearchStore((s) => s.clearPendingDestination);
   const pendingRoute = useHomeSearchStore((s) => s.pendingRoute);
   const clearPendingRoute = useHomeSearchStore((s) => s.clearPendingRoute);
+  const pendingEdit = useHomeSearchStore((s) => s.pendingEdit);
+  const clearPendingEdit = useHomeSearchStore((s) => s.clearPendingEdit);
 
   // Quick-fill from the route map explorer further down the page: resolve
   // the requested city against the real stop-search API (same one the
@@ -57,6 +59,9 @@ export function SearchHero() {
         if (cancelled || !body.ok) return;
         const match = body.data[0];
         if (match) setDestination(match);
+      })
+      .catch(() => {
+        // Best-effort quick-fill — an unreachable API just leaves the field empty.
       })
       .finally(() => {
         if (!cancelled) clearPendingDestination();
@@ -75,6 +80,45 @@ export function SearchHero() {
     setDestination(pendingRoute.destination);
     clearPendingRoute();
   }, [pendingRoute, clearPendingRoute]);
+
+  // "Edit search" from the results page: re-resolve both stops by the same
+  // city text the results page already showed, then keep only the exact
+  // stop-id match — the id is already known-correct (it's what produced
+  // those results), the search just gets us the rest of the real StopRow.
+  useEffect(() => {
+    if (!pendingEdit) return;
+    let cancelled = false;
+    Promise.all([
+      fetch(`/api/stops/search?q=${encodeURIComponent(pendingEdit.originQuery)}`).then(
+        (res) => res.json() as Promise<ApiResult<StopRow[]>>
+      ),
+      fetch(`/api/stops/search?q=${encodeURIComponent(pendingEdit.destinationQuery)}`).then(
+        (res) => res.json() as Promise<ApiResult<StopRow[]>>
+      ),
+    ])
+      .then(([originBody, destinationBody]) => {
+        if (cancelled) return;
+        const originMatch = originBody.ok
+          ? (originBody.data.find((s) => s.id === pendingEdit.originStopId) ?? originBody.data[0])
+          : undefined;
+        const destinationMatch = destinationBody.ok
+          ? (destinationBody.data.find((s) => s.id === pendingEdit.destinationStopId) ?? destinationBody.data[0])
+          : undefined;
+        if (originMatch) setOrigin(originMatch);
+        if (destinationMatch) setDestination(destinationMatch);
+        setDate(new Date(`${pendingEdit.date}T00:00:00`));
+        setPassengers(pendingEdit.passengers);
+      })
+      .catch(() => {
+        // Best-effort re-resolve — an unreachable API just leaves the fields as they were.
+      })
+      .finally(() => {
+        if (!cancelled) clearPendingEdit();
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [pendingEdit, clearPendingEdit]);
 
   const canSearch = Boolean(origin && destination && origin.id !== destination.id && date);
 
@@ -158,7 +202,7 @@ export function SearchHero() {
   );
 
   return (
-    <div id="search-dock" className="relative">
+    <div id="search-dock" className="relative scroll-mt-20">
       <form onSubmit={handleSubmit}>
         {/* Desktop / tablet: single-line pill dock */}
         <div className="hidden items-stretch rounded-full border border-slate-200/80 bg-white p-2 shadow-2xl md:flex">

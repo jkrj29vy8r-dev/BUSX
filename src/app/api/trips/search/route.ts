@@ -173,6 +173,7 @@ export async function GET(request: NextRequest): Promise<NextResponse<ApiResult<
       price,
       availableSeatsCount,
       vehicleType: trip.vehicle.vehicleType,
+      amenities: (trip.vehicle.amenities as unknown as TripSearchResult["amenities"]) ?? [],
     });
   }
 

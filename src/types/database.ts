@@ -439,6 +439,10 @@ export interface TripSearchResult {
   price: PriceQuote;
   availableSeatsCount: number;
   vehicleType: VehicleTypeEnum;
+  /** The actual vehicle's declared amenities (Fleet Builder-editable) —
+   * empty until an operator sets them on the vehicle; the search result
+   * only ever shows what's really configured, never a fixed marketing list. */
+  amenities: VehicleAmenity[];
   /** Full route's stop count and index bounds, so the UI can plot this
    * segment's position within the larger N-stop graph without a second
    * fetch of every route_stop. */

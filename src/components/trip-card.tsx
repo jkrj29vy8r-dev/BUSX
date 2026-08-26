@@ -2,13 +2,14 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { ListTree, ShieldCheck, Users } from "lucide-react";
+import { Briefcase, ListTree, ShieldCheck, Users } from "lucide-react";
 import { CardInteractive } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { RouteTimelineBar } from "@/components/route-timeline-bar";
 import { RouteItineraryDrawer } from "@/components/route-itinerary-drawer";
 import { VEHICLE_TYPE_LABELS } from "@/lib/vehicle-labels";
+import { AMENITY_ICONS, AMENITY_LABELS } from "@/lib/amenity-labels";
 import type { TripSearchResult } from "@/types/database";
 
 interface TripCardProps {
@@ -19,7 +20,19 @@ interface TripCardProps {
 export function TripCard({ result, passengers }: TripCardProps) {
   const router = useRouter();
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const { trip, company, origin, destination, price, availableSeatsCount, vehicleType, routeStopCount, routeStartOrderIndex, routeEndOrderIndex } = result;
+  const {
+    trip,
+    company,
+    origin,
+    destination,
+    price,
+    availableSeatsCount,
+    vehicleType,
+    amenities,
+    routeStopCount,
+    routeStartOrderIndex,
+    routeEndOrderIndex,
+  } = result;
 
   const durationMinutes = Math.round(
     (new Date(destination.scheduledArrival).getTime() - new Date(origin.scheduledDeparture).getTime()) / 60_000
@@ -57,7 +70,22 @@ export function TripCard({ result, passengers }: TripCardProps) {
           routeSpan={{ start: routeStartOrderIndex, end: routeEndOrderIndex, stopCount: routeStopCount }}
         />
 
-        <div className="mt-4 flex items-center justify-between border-t border-border pt-4">
+        <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-xs text-ink-tertiary">
+          {amenities.map((amenity) => {
+            const Icon = AMENITY_ICONS[amenity.key];
+            return (
+              <span key={amenity.key} className="flex items-center gap-1" title={AMENITY_LABELS[amenity.key]}>
+                <Icon className="size-3.5" strokeWidth={1.75} />
+                {AMENITY_LABELS[amenity.key]}
+              </span>
+            );
+          })}
+          <span className="flex items-center gap-1" title="Politică bagaje BUSX">
+            <Briefcase className="size-3.5" strokeWidth={1.75} />1 bagaj de cală inclus
+          </span>
+        </div>
+
+        <div className="mt-3 flex items-center justify-between border-t border-border pt-4">
           <div className="flex items-center gap-3 text-xs text-ink-tertiary">
             <span className="font-mono font-medium">
               {hours}h {minutes.toString().padStart(2, "0")}m
@@ -92,7 +120,7 @@ export function TripCard({ result, passengers }: TripCardProps) {
                 router.push(href);
               }}
             >
-              Alege
+              Selectează Loc
             </Button>
           </div>
         </div>
